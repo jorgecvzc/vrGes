@@ -82,7 +82,7 @@ class ModificadorArt (UInf, Base):
     variante = relationship('VarianteArt')
 
     def __str__(self):
-        return "<ModificadorArt (Ref='%s', Nombre='%s')>" % (self.ref, self.nombre)
+        return "<ModificadorArt (Ref='%s', Nombre='%s', id_variante='%i')>" % (self.ref, self.nombre, self.varianteId)
 
     
 class ArtEscandallo (Base):

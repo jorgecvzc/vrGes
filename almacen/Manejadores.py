@@ -30,8 +30,17 @@ class MnjUInfs (object):
  
     def guardaCambios(self):
         return self.session.commit()
-        
 
+    def buscaMaestro(self, filtro):
+        if isinstance(filtro, UInf):
+            self.session.expunge(filtro)
+            stmt = select(VarianteArt).where(VarianteArt.ref == 'TGEN')
+            print ('====', 'uinf')
+            return self.session.scalars(stmt).all()
+        else: 
+            print ('====', filtro)
+            
+            
 class MnjMaestros (MnjUInfs):
     
     ''' ------------------------------------------------------------

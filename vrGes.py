@@ -26,17 +26,26 @@ class Gestion(object):
         
 if __name__ == "__main__":
     def imps():
-        print('=======')
+        print('== '+str(mnj.session)+' ==')
         for s in mnj.session:
             print (s)
-        print('=======')
+        print('============================')
 
     g = Gestion('..')
     mnj = g.cUInf.mnjMaestros()
     mst = mnj.nuevoMaestro('ModificadorArt')
     mst['ref'] = 'refV5'
-    
+    res = mnj.buscaMaestro(mst)[0]
     imps()
+    mnj.session.expunge(res)
+    imps()
+    res['nombre'] = 'TALLA GENÉRICAs'
+    mnj.session.add(res)
+    mnj.session.commit()
+    imps()
+    
+    
+    
     '''    
     
     mst2 = mnj.nuevoMaestro('ModificadorArt')
