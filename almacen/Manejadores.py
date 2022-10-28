@@ -34,7 +34,7 @@ class MnjUInfs (object):
     def buscaMaestro(self, filtro):
         if isinstance(filtro, UInf):
             self.session.expunge(filtro)
-            stmt = select(VarianteArt).where(VarianteArt.ref == 'TGEN')
+            stmt = select(ModificadorArt).where(ModificadorArt.id == 1)
             print ('====', 'uinf')
             return self.session.scalars(stmt).all()
         else: 

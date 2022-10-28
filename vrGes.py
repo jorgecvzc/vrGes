@@ -34,15 +34,12 @@ if __name__ == "__main__":
     g = Gestion('..')
     mnj = g.cUInf.mnjMaestros()
     mst = mnj.nuevoMaestro('ModificadorArt')
-    mst['ref'] = 'refV5'
+    
     res = mnj.buscaMaestro(mst)[0]
     imps()
-    mnj.session.expunge(res)
-    imps()
-    res['nombre'] = 'TALLA GENÉRICAs'
-    mnj.session.add(res)
-    mnj.session.commit()
-    imps()
+    print(res.variante)
+    imps()    
+    print(mnj.session.commit())
     
     
     
