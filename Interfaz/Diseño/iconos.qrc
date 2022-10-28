@@ -1,0 +1,11 @@
+<RCC>
+  <qresource>
+    <file>Iconos/icGuardar.png</file>
+    <file>Iconos/icBuscar.png</file>
+    <file>Iconos/icSalir.png</file>
+    <file>Iconos/icMovPrimero.png</file>
+    <file>Iconos/icMovAnterior.png</file>
+    <file>Iconos/icMovSiguiente.png</file>
+    <file>Iconos/icMovUltimo.png</file>
+  </qresource>
+</RCC>

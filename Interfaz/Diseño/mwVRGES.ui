@@ -1,0 +1,297 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="windowModality">
+   <enum>Qt::ApplicationModal</enum>
+  </property>
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>813</width>
+    <height>598</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>VR-Ges</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <item>
+     <widget class="QMdiArea" name="mdiArea">
+      <property name="enabled">
+       <bool>true</bool>
+      </property>
+      <property name="baseSize">
+       <size>
+        <width>100</width>
+        <height>100</height>
+       </size>
+      </property>
+      <property name="autoFillBackground">
+       <bool>true</bool>
+      </property>
+      <property name="sizeAdjustPolicy">
+       <enum>QAbstractScrollArea::AdjustIgnored</enum>
+      </property>
+      <widget class="QWidget" name="subwindow">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="windowTitle">
+        <string>Subwindow</string>
+       </property>
+      </widget>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>813</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="mnuMaestros">
+    <property name="title">
+     <string>Maestros</string>
+    </property>
+    <widget class="QMenu" name="menuArt_culos">
+     <property name="title">
+      <string>Artículos</string>
+     </property>
+     <addaction name="actArticulos"/>
+     <addaction name="actModificadoresArt"/>
+     <addaction name="actVariantesArt"/>
+    </widget>
+    <addaction name="menuArt_culos"/>
+    <addaction name="actPedidos"/>
+    <addaction name="actTrabajos"/>
+    <addaction name="actProcesos"/>
+    <addaction name="actTareas"/>
+    <addaction name="actPosiciones"/>
+    <addaction name="actCerrarVentana"/>
+   </widget>
+   <widget class="QMenu" name="mnuNavegar">
+    <property name="title">
+     <string>Operaciones</string>
+    </property>
+    <widget class="QMenu" name="menuVe_a_Registro">
+     <property name="title">
+      <string>Ve a Registro</string>
+     </property>
+     <addaction name="actOpRegPrimero"/>
+     <addaction name="actOpRegAnterior"/>
+     <addaction name="actOpRegSiguiente"/>
+     <addaction name="actOpRegUltimo"/>
+    </widget>
+    <addaction name="actOpNuevo"/>
+    <addaction name="actOpGuardar"/>
+    <addaction name="actOpEliminar"/>
+    <addaction name="separator"/>
+    <addaction name="menuVe_a_Registro"/>
+    <addaction name="separator"/>
+    <addaction name="actOpBuscar"/>
+   </widget>
+   <widget class="QMenu" name="menuImprime_MAESTRO">
+    <property name="title">
+     <string>Log</string>
+    </property>
+    <addaction name="actLogImp"/>
+   </widget>
+   <widget class="QMenu" name="menuSalir">
+    <property name="title">
+     <string>Salir</string>
+    </property>
+   </widget>
+   <addaction name="mnuMaestros"/>
+   <addaction name="mnuNavegar"/>
+   <addaction name="menuImprime_MAESTRO"/>
+   <addaction name="menuSalir"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <widget class="QToolBar" name="tbPrincipal">
+   <property name="windowTitle">
+    <string>toolBar</string>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>40</width>
+     <height>40</height>
+    </size>
+   </property>
+   <property name="toolButtonStyle">
+    <enum>Qt::ToolButtonIconOnly</enum>
+   </property>
+   <property name="floatable">
+    <bool>false</bool>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="actOpRegPrimero"/>
+   <addaction name="actOpRegAnterior"/>
+   <addaction name="actOpRegSiguiente"/>
+   <addaction name="actOpRegUltimo"/>
+   <addaction name="separator"/>
+   <addaction name="actOpBuscar"/>
+  </widget>
+  <widget class="QToolBar" name="toolBar">
+   <property name="windowTitle">
+    <string>toolBar</string>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>40</width>
+     <height>40</height>
+    </size>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="actOpGuardar"/>
+   <addaction name="actCerrarVentana"/>
+  </widget>
+  <action name="actPedidos">
+   <property name="text">
+    <string>Pedidos</string>
+   </property>
+  </action>
+  <action name="actArticulos">
+   <property name="text">
+    <string>Artículos</string>
+   </property>
+  </action>
+  <action name="actOpRegPrimero">
+   <property name="icon">
+    <iconset>
+     <normaloff>Iconos/icMovPrimero.png</normaloff>Iconos/icMovPrimero.png</iconset>
+   </property>
+   <property name="text">
+    <string>Registro Primero</string>
+   </property>
+  </action>
+  <action name="actOpRegAnterior">
+   <property name="icon">
+    <iconset>
+     <normaloff>Iconos/icMovAnterior.png</normaloff>Iconos/icMovAnterior.png</iconset>
+   </property>
+   <property name="text">
+    <string>Registro Anterior</string>
+   </property>
+  </action>
+  <action name="actOpRegSiguiente">
+   <property name="icon">
+    <iconset>
+     <normaloff>Iconos/icMovSiguiente.png</normaloff>Iconos/icMovSiguiente.png</iconset>
+   </property>
+   <property name="text">
+    <string>Registro Siguiente</string>
+   </property>
+  </action>
+  <action name="actOpRegUltimo">
+   <property name="icon">
+    <iconset>
+     <normaloff>Iconos/icMovUltimo.png</normaloff>Iconos/icMovUltimo.png</iconset>
+   </property>
+   <property name="text">
+    <string>Registro Último</string>
+   </property>
+  </action>
+  <action name="actTareas">
+   <property name="text">
+    <string>Tareas</string>
+   </property>
+  </action>
+  <action name="actOpGuardar">
+   <property name="icon">
+    <iconset>
+     <normaloff>Iconos/icGuardar.png</normaloff>Iconos/icGuardar.png</iconset>
+   </property>
+   <property name="text">
+    <string>Guardar</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+G</string>
+   </property>
+  </action>
+  <action name="actOpNuevo">
+   <property name="text">
+    <string>Nuevo</string>
+   </property>
+  </action>
+  <action name="actLogImp">
+   <property name="text">
+    <string>Imprime Maestro</string>
+   </property>
+  </action>
+  <action name="actTrabajos">
+   <property name="text">
+    <string>Trabajos</string>
+   </property>
+  </action>
+  <action name="actProcesos">
+   <property name="text">
+    <string>Procesos</string>
+   </property>
+  </action>
+  <action name="actCerrarVentana">
+   <property name="icon">
+    <iconset>
+     <normaloff>Iconos/icSalir.png</normaloff>Iconos/icSalir.png</iconset>
+   </property>
+   <property name="text">
+    <string>Cerrar Ventana</string>
+   </property>
+  </action>
+  <action name="actPosiciones">
+   <property name="text">
+    <string>Posiciones</string>
+   </property>
+  </action>
+  <action name="actOpBuscar">
+   <property name="icon">
+    <iconset>
+     <normaloff>Iconos/icBuscar.png</normaloff>Iconos/icBuscar.png</iconset>
+   </property>
+   <property name="text">
+    <string>Buscar</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+B</string>
+   </property>
+  </action>
+  <action name="actOpEliminar">
+   <property name="text">
+    <string>Elimina</string>
+   </property>
+  </action>
+  <action name="actModificadoresArt">
+   <property name="text">
+    <string>Modificadores</string>
+   </property>
+  </action>
+  <action name="actVariantesArt">
+   <property name="text">
+    <string>Variantes</string>
+   </property>
+  </action>
+ </widget>
+ <resources>
+  <include location="iconos.qrc"/>
+ </resources>
+ <connections/>
+</ui>

@@ -1,0 +1,227 @@
+    def almacenaMaestroLineas(self, mst_id, maestro_lineas, nombre_ml, ml_arbol):
+        
+        result = 0
+
+        camposSimples = [c for c in maestro_lineas.getCampos() if ((ml_arbol[c].tipo!='l') and (ml_arbol[c].valor))]
+        camposCompuestos = [c for c in maestro_lineas.getCampos() if ml_arbol[c].tipo=='l']
+        camposIdsPadre = []
+        idsPadre = []
+
+        strCons = ''
+        print(mst_id)
+        for i in range(len(mst_id)):
+            camposIdsPadre.append(ml_arbol.id[i])
+            idsPadre.append(mst_id[i])
+            strCons += ml_arbol.id[i] + '=' + str(mst_id[i]) + ' And '
+        strCons = strCons[:-4]
+        print(strCons)
+        i += 1
+        
+        # Obtiene el número de líneas almacenadas y del objeto
+        tablaBD = ml_arbol.tabla
+        campoOrden = ml_arbol.Orden
+
+        campoIdF =  ml_arbol.id[i]
+        
+        if (None in maestro_lineas._idfilasModif): maestro_lineas._idfilasModif.remove(None)       
+        idsFila = maestro_lineas._idfilas[:]
+        regMaxIdLineas = self.bdcon.selecciona([tablaBD], ['max('+campoIdF+') As maxid'], strCons).fetchone()
+        idFilaAlm= regMaxIdLineas['maxid']+1 if regMaxIdLineas['maxid'] else 1
+                
+        for i in range(len(idsFila)):
+            idfila = idsFila[i]
+            
+            campos = [campoOrden] +  [ml_arbol[k].valor for k in camposSimples]
+            valores = [i] + [maestro_lineas.getValor(i, k) if (ml_arbol[k].tipo != 'e') else maestro_lineas.getValor(i,k).getId() for k in camposSimples ]
+            if idfila == None:
+                # Hay que crear la fila en almacén con el orden correspondiente
+                idfila = idFilaAlm
+                idFilaAlm += 1
+                self.bdcon.inserta(tablaBD, camposIdsPadre+[campoIdF]+campos, idsPadre+[idfila]+valores)
+                maestro_lineas._idfilas[i] = idfila
+                result += 1
+            elif idfila in maestro_lineas._idfilasModif:
+                # La fila existe y ha de actualizarla en almacén  con el orden correspondiente
+                self.bdcon.actualiza(tablaBD, campos, valores, strCons +  ' And ' + '('+campoIdF+'='+str(idfila)+')')
+                maestro_lineas._idfilasModif.remove(idfila)
+                result += 1
+                
+            for c in camposCompuestos:
+                self.AlmacenaMaestroLineas(idsPadre + [idfila], maestro_lineas.getValor(i, c), c, ml_arbol[c].valor)
+
+        # Se borran del almacen las lineas borradas del objeto
+        filas_borrar = maestro_lineas._idfilasModif[:]
+        for idfila in filas_borrar:
+            if idfila:
+                self.bdcon.borra(tablaBD, strCons +  ' And ' + '('+campoIdF+'='+str(idfila)+')')
+            maestro_lineas._idfilasModif.remove(idfila)
+        
+        return result
+    
+    
+    #----------------------------
+    # Funciones para el manejo de campos tipo MaestroLineas
+    #---  
+        
+    def nuevoMaestroLineas(self, nombre_ml, ml_arbol):
+        ml = ControlMaestro().nuevoMaestroLineas(nombre_ml)  # Importante!! En la defición XML los índices deben estar en primer lugar para que no haya error
+        for campo in ml_arbol.nombresCampos():
+            tipo = ml_arbol[campo].tipo
+            ml._nuevoCampo(campo, tipo)
+        return ml
+    
+    def cargaMaestroLineas(self, mst_id, nombre_ml, ml_arbol):
+        # -- Carga de una variable en formato objeto de MaestroLineas
+        ml = self.nuevoMaestroLineas(nombre_ml, ml_arbol)  # Importante!! En la defición XML los índices deben estar en primer lugar para que no haya error
+
+        # Carga los nombnres de variables de los valores para el maestro lineas y la columna a que hacer referencia
+        varNombres = list(ml_arbol.nombresCampos()) 
+        ml._setCampos(varNombres)
+           
+        strCons = ''
+        
+        for i in range(len(mst_id)):
+            strCons += ml_arbol.id[i] + '=' + str(mst_id[i]) + ' And '
+        strCons = strCons[:-4]
+        i += 1
+            
+        # Carga la matriz de valores con los diferentes registros procedentes del almancenaje ordenadas según el orden
+        reglineas = self.bdcon.selecciona([ml_arbol.tabla], ['*'], strCons, [ml_arbol.Orden]).fetchall()
+        
+        for reglin in reglineas:
+            lineaDatos = []
+            idLineaDatos = reglin[ml_arbol.id[-1]]
+            for variable in varNombres:
+                if (ml_arbol[variable].tipo == 'l'):
+                    lineaDatos.append(self.CargaMaestroLineas(list(mst_id)+[idLineaDatos], variable, ml_arbol[variable].valor))
+                elif (ml_arbol[variable].tipo == 'e'):
+                    lvalor = []
+                    for i in range(len(ml_arbol[variable].valor.ids)):
+                        lvalor.append(reglin[ml_arbol[variable].valor.ids[i]])
+                    lineaDatos.append(tuple(lvalor))
+                elif (ml_arbol[variable].valor):
+                    lineaDatos.append(reglin[ml_arbol[variable].valor])
+                else:
+                    lineaDatos.append(None)
+            nfila = ml.nuevaFilaValores(lineaDatos)
+            ml._setIdFila(nfila, idLineaDatos)
+        
+        return ml
+
+    #----------------------------
+    # Funciones para el manejo de Maestros
+    #---    
+        
+    def nuevoMaestro(self, m_arbol):
+        maestro = ControlMaestro().nuevoMaestro(m_arbol.maestro)
+        for campo in m_arbol.nombresCampos():
+            tipo = m_arbol[campo].tipo
+            maestro._nuevoCampo(campo, tipo)
+            if (tipo == 'l'):
+                maestro[campo] = self.nuevoMaestroLineas(campo, m_arbol[campo].valor)
+        return maestro    
+    
+    def cargaMaestro(self, m_arbol, mst_ref, tunel_señal=None):
+        '''
+        Modifica los datos del maestro con la información cargada desde el almacenaje
+          - mst_ref: Maestro con los datos de referencia para realizar la carga 
+          - opcion_carga: Indica que características tendrá la carga. De uso futuro.
+        Devuelve el estado de la operación
+        '''
+        maestro = self.nuevoMaestro(m_arbol)
+        maestro.asignaTunelSeñal(tunel_señal)
+
+        cond = ''
+        if (isinstance(mst_ref, int)):
+            cond += str(m_arbol.id[0]) + '=' + str(mst_ref)
+        elif (isinstance(mst_ref, tuple)):
+            cond += ' And '.join(map(lambda i: str(m_arbol.id[i]) + '=' + str(mst_ref[i]), range(len(mst_ref))))
+        elif (isinstance(mst_ref, Maestro)) and (mst_ref.getTipo() == m_arbol.maestro):
+            cond = ''
+            for datoCarga in mst_ref._camposModificados():
+                if (m_arbol[datoCarga].tipo != 'l'):
+                    cond += m_arbol[datoCarga].valor+'="'+str(mst_ref[datoCarga]) + '" And '
+            cond = cond[:-4]
+        else:
+            raise NameError('Error - Manejador->CargaMaestro. Los tipos no coinciden ')
+        consRegs = self.bdcon.selecciona([m_arbol.tabla], ['*'], cond, [], 1).fetchall()
+
+        if consRegs:
+            reg = consRegs[0]
+            # Carga el valor del indice
+            lid = []
+            for idm in m_arbol.id:
+                lid.append(reg[idm])
+            maestro._setId(tuple(lid))
+
+            # Carga el resto de valores del maestro
+            for campo in m_arbol.nombresCampos():
+                if (m_arbol[campo].tipo == 'l'):
+                    maestro[campo] = self.cargaMaestroLineas(maestro.getId(), campo, m_arbol[campo].valor)
+                elif (m_arbol[campo].tipo == 'e'):
+                    lvalor = []
+                    for i in range(len(m_arbol[campo].valor.ids)):
+                        lvalor.append(reg[m_arbol[campo].valor.ids[i]])
+                    maestro[campo] = tuple(lvalor)
+                elif m_arbol[campo].valor:
+                    maestro[campo] = reg[m_arbol[campo].valor]
+
+            maestro._vaciaCamposModificados()
+            return maestro
+        else:
+            return None
+  
+  
+    
+    def almacenaMaestro(self, m_arbol, maestro, opcion_almacen=0):
+        '''
+        Almacena el maestro partiendo de un maestro de referencia con las propiedades necesarias para buscar el nuevo
+          - maestro: Maestro con los datos a almacenar 
+          - opcion_almacén: Indica las opciones que tendrá el almacenamiento
+        '''
+        if isinstance(maestro, (type(None), tuple)) :
+            return None
+
+        if (not maestro.getId()):
+            # Si no existe índice en el maestro es que hay que crear uno nuevo con todos los campos con valor
+            camposTabla = []
+            valores = []
+            idM = None          
+            
+            camposL = []
+            for campoInsercion in maestro._camposModificados()[:]:
+                if (m_arbol[campoInsercion].tipo == 'l'):
+                    camposL.append(campoInsercion)
+                elif (m_arbol[campoInsercion].valor):
+                    camposTabla.append(m_arbol[campoInsercion].valor)
+                    valores.append(str(maestro[campoInsercion]))
+            
+            if (camposL or camposTabla):
+                idM = self.bdcon.inserta(m_arbol.tabla, camposTabla, valores)
+                for campoAlmacenar in camposL:
+                    self.almacenaMaestroLineas(idM, maestro[campoAlmacenar], campoAlmacenar, m_arbol[campoAlmacenar].valor)
+            return idM
+            
+        else:
+            camposTabla = []
+            valores = []
+            for campoAlmacenar in maestro._camposModificados()[:]:
+                if (m_arbol[campoAlmacenar].tipo == 'l'):
+                    print('s')
+                    self.almacenaMaestroLineas(maestro.getId(), maestro[campoAlmacenar], campoAlmacenar, m_arbol[campoAlmacenar].valor)
+                elif (m_arbol[campoAlmacenar].tipo == 'e'):
+                    if campoAlmacenar in maestro._externosPendientes:
+                        camposTabla.append(m_arbol[campoAlmacenar].valor)
+                        valores.append(maestro[campoAlmacenar])
+                    else:
+                        camposTabla.append(m_arbol[campoAlmacenar].valor)
+                        valores.append(maestro[campoAlmacenar].getId())
+                elif (m_arbol[campoAlmacenar].valor):
+                    camposTabla.append(m_arbol[campoAlmacenar].valor)
+                    valores.append(maestro[campoAlmacenar])
+                maestro._camposModif.remove(campoAlmacenar)
+            if camposTabla:
+                self.bdcon.actualiza(m_arbol.tabla, camposTabla, valores, str(m_arbol.id[0]) + '=' + str(maestro.getId()))
+
+            return maestro.getId()
+      
