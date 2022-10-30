@@ -10,18 +10,20 @@ from almacen import ControlUinfs
 class Gestion(object):
     
     def __init__(self, ruta):
-        import os, inspect
-        dirconf = os.path.dirname(inspect.getfile(inspect.currentframe()))
+        #import os, inspect
+        #dirconf = os.path.dirname(inspect.getfile(inspect.currentframe()))
+        import pathlib
+
+        dirconf = str(pathlib.Path(__file__).parent.absolute())
         
         # Ruta de la aplicación de donde se podrán extraer todas las configuraciones y accesos a elementos propios
-        if (dirconf[-1] != '/'):
+        if dirconf and (dirconf[-1] != '/'):
             dirconf = dirconf + '/'        
         self.rutaApp = dirconf + '/' + ruta + '/'
 
         # Carga el archivo de configuración
         self.iniConfig = configparser.ConfigParser()
         self.iniConfig.read(self.rutaApp+'config.ini')
-        
         self.cUInf = ControlUinfs(self.iniConfig["BD"])
         
 if __name__ == "__main__":

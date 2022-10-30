@@ -176,7 +176,7 @@ class Proveedor (Base):
     
 if __name__ == '__main__':
     from sqlalchemy import create_engine
-    engine = create_engine('postgresql://postgres:pVRB2018.@192.168.2.200:5432/bdVRGes') # , echo=True
+    engine = create_engine('postgresql://admin:1234.@127.0.0.1:5432/vrges') # , echo=True
     Base.metadata.create_all(engine)
     Session = sessionmaker(bind=engine)
     session = Session()
