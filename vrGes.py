@@ -1,8 +1,9 @@
 '''
 Created on 27 dic. 2018
 
-@author: cortesj
+@author: Jorante
 '''
+import sys
 import configparser
 
 from almacen import ControlUinfs
@@ -25,31 +26,36 @@ class Gestion(object):
         self.iniConfig = configparser.ConfigParser()
         self.iniConfig.read(self.rutaApp+'config.ini')
         self.cUInf = ControlUinfs(self.iniConfig["BD"])
-        
+
+def main():
+    g = Gestion('..')
+
+    if 'generabd' in sys.argv:
+        g.cUInf.generaBD()
+
+
 if __name__ == "__main__":
+    main()
+
     def imps():
         print('== '+str(mnj.session)+' ==')
         for s in mnj.session:
             print (s)
         print('============================')
-
-    g = Gestion('..')
+    g = Gestion('..')    
+        
     mnj = g.cUInf.mnjMaestros()
-    mst = mnj.nuevoMaestro('ModificadorArt')
+    mst = mnj.nuevoMaestro('VarianteArt')
+
+    #res = mnj.buscaMaestro(mst)[0]
     
-    res = mnj.buscaMaestro(mst)[0]
+    #print(res.variante)
+        
+    mst['ref'] = 'TGEN'
+    mst['nombre'] = 'TALLA GENÉRICA'
+    
     imps()
-    print(res.variante)
-    imps()    
-    print(mnj.session.commit())
-    
-    
-    
-    '''    
-    
-    mst2 = mnj.nuevoMaestro('ModificadorArt')
-    mst2['ref'] = 'ref5'
-    
+    '''
     
 
     

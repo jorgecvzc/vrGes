@@ -2,7 +2,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 #
-from .Manejadores import MnjMaestros
+from .Manejadores import MnjMaestros, Base
 
 
 class ControlUinfs (object):
@@ -18,6 +18,9 @@ class ControlUinfs (object):
                                 conf_conexion["Usuario"]+':'+conf_conexion["Clave"]+'@'+
                                 conf_conexion["Servidor"]+':5432/'+conf_conexion["NombreBD"], echo=False)
         self.Session = sessionmaker(bind=self.bd)
+
+    def generaBD(self):
+        Base.metadata.create_all(self.bd)
 
     def mnjMaestros(self):
         # Establece el almacen por defecto

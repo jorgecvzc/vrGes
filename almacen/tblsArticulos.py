@@ -82,7 +82,7 @@ class ModificadorArt (UInf, Base):
     variante = relationship('VarianteArt')
 
     def __str__(self):
-        return "<ModificadorArt (Ref='%s', Nombre='%s', id_variante='%i')>" % (self.ref, self.nombre, self.varianteId)
+        return "<ModificadorArt (Ref='%s', Nombre='%s', id_variante='%s')>" % (self.ref, self.nombre, str(self.varianteId))
 
     
 class ArtEscandallo (Base):
@@ -174,12 +174,3 @@ class Proveedor (Base):
     # RelationsShip
     #pedidos = relationship('Pedidos', back_populates='cliente')    
     
-if __name__ == '__main__':
-    from sqlalchemy import create_engine
-    engine = create_engine('postgresql://admin:1234.@127.0.0.1:5432/vrges') # , echo=True
-    Base.metadata.create_all(engine)
-    Session = sessionmaker(bind=engine)
-    session = Session()
-    print(session.query(Articulo).get(1).__dict__['nombre'])
-    
-    print('Hecho')
