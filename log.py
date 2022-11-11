@@ -4,8 +4,8 @@ APP_LOGGER_NAME = 'VRGes'
 
 def ini_logger(logger_name = APP_LOGGER_NAME, file_name=None):
     logger = logging.getLogger(logger_name)
-    #logger.setLevel(logging.DEBUG)
-    logger.setLevel(0)
+    logger.setLevel(logging.DEBUG)
+    #logger.setLevel(0)
     
     formatter = logging.Formatter('%(asctime)-5s %(name)-15s %(levelname)-8s %(message)s')
     

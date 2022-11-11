@@ -1,8 +1,9 @@
 #
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import declarative_base
 #
-from .Manejadores import MnjMaestros, Base
+from .Manejadores import MnjMaestro, MnjListasMaestros, MnjConsultas
 
 
 class ControlUinfs (object):
@@ -17,13 +18,21 @@ class ControlUinfs (object):
         self.bd = create_engine(conf_conexion["Motor"]+'://'+ 
                                 conf_conexion["Usuario"]+':'+conf_conexion["Clave"]+'@'+
                                 conf_conexion["Servidor"]+':5432/'+conf_conexion["NombreBD"], echo=False)
-        self.Session = sessionmaker(bind=self.bd)
 
     def generaBD(self):
-        Base.metadata.create_all(self.bd)
+        declarative_base().metadata.create_all(self.bd)
+        
+    def mnjMaestro(self):
+        # Devuelve un Manejador de Maestros
+        session = sessionmaker(bind=self.bd)
+        return MnjMaestro(session())
 
-    def mnjMaestros(self):
-        # Establece el almacen por defecto
-        return MnjMaestros(self.Session())
+    def mnjListasMaestros(self):
+        # Devuelve un Manejador de Listas de Maestros
+        session = sessionmaker(bind=self.bd)
+        return MnjListasMaestros(session())
 
-
+    def mnjConsultas(self):
+        # Devuelve un Manejador de Consultas
+        return MnjConsultas(self.bd)
+        

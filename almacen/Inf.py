@@ -4,7 +4,7 @@ from sqlalchemy.orm import sessionmaker
 
 from unidadesInf import tipoUInf
 
-from .tblsArticulos import *
+from almacen.mstArticulos import *
 
 
 class FunSQL ():

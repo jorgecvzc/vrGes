@@ -1,7 +1,7 @@
 from sqlalchemy.inspection import inspect
 from sqlalchemy.orm import InstrumentedAttribute
 
-from .tblsArticulos import *
+from almacen.mstArticulos import *
 
 from unidadesInf import tipoUInf
 

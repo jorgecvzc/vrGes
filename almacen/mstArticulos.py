@@ -11,7 +11,7 @@ from sqlalchemy.schema import ForeignKey
 from sqlalchemy.orm import declarative_base
 from sqlalchemy.orm import relationship, sessionmaker
 
-from .uInfs import UInf
+from .uInfs import Maestro
 
 Base = declarative_base()
 
@@ -60,7 +60,7 @@ class Articulo (Base):
         return "<Articulo (Ref='%s', Nombre='%s')>" % (self.artRef, self.artNombre)    
 
 
-class VarianteArt (UInf, Base):
+class Variante (Maestro, Base):
     __tablename__ = 'VariantesArt'
     
     id = Column('varId', Integer, primary_key=True)
@@ -68,10 +68,10 @@ class VarianteArt (UInf, Base):
     nombre = Column('varNombre', String(50), info={'t':'t'})
 
     def __str__(self):
-        return "<VarianteArt (Ref='%s', Nombre='%s')>" % (self.ref, self.nombre)
+        return "<mst: Articulo.Variante (Ref='%s', Nombre='%s')>" % (self.ref, self.nombre)
 
 
-class ModificadorArt (UInf, Base):
+class Modificador (Maestro, Base):
     __tablename__ = 'ModificadoresArt'
     
     id = Column('moaId', Integer, primary_key=True)
@@ -79,10 +79,10 @@ class ModificadorArt (UInf, Base):
     nombre = Column('moaNombre', String(50), info={'t':'t'})
     varianteId = Column('moaVariante', Integer, ForeignKey("VariantesArt.varId"), info={'t':'e', 'e':'VarianteArt'})
     
-    variante = relationship('VarianteArt')
+    variante = relationship('Variante')
 
     def __str__(self):
-        return "<ModificadorArt (Ref='%s', Nombre='%s', id_variante='%s')>" % (self.ref, self.nombre, str(self.varianteId))
+        return "<mst: Articulo.Modificador (Ref='%s', Nombre='%s', id_variante='%s')>" % (self.ref, self.nombre, str(self.varianteId))
 
     
 class ArtEscandallo (Base):

@@ -3,9 +3,9 @@ Created on 4 sept. 2020
 
 @author: cortesj
 '''
+import sys
 from PyQt5 import QtWidgets
 from PyQt5 import uic
-from Control import Control
 from mnjDgPedidos import ifPedidos
 from mnjWdArticulos import ifArticulos, ifModificadoresArt, ifVariantesArt
 from mnjWdTrabajos import ifTrabajos, ifProcesos, ifTareas, ifPosiciones
@@ -14,7 +14,7 @@ from mnjWdTrabajos import ifTrabajos, ifProcesos, ifTareas, ifPosiciones
 class MainWindow(QtWidgets.QMainWindow):
     def __init__(self, mc, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        uic.loadUi("Diseño/mwVRGES.ui", self)
+        uic.loadUi("Interfaz/Diseño/mwVRGES.ui", self)
         self.cm = mc
         
         ifs = {'Pedidos': ['Pedido', 'Articulo'], 
@@ -26,14 +26,14 @@ class MainWindow(QtWidgets.QMainWindow):
                'ModificadoresArt': ['ModificadorArt'],
                'VariantesArt': ['VarianteArt']
                }
-        self.uis = {'Pedidos': (lambda x: ifPedidos(mnj=self.cm.nuevoManejador(Maestros=ifs[x]))), 
-               'Articulos': (lambda x: ifArticulos(mnj=self.cm.nuevoManejador(Maestros=ifs[x]))),
-               'ModificadoresArt': (lambda x: ifModificadoresArt(mnj=self.cm.nuevoManejador(Maestros=ifs[x]))),
-               'VariantesArt': (lambda x: ifVariantesArt(mnj=self.cm.nuevoManejador(Maestros=ifs[x]))),
-               'Posiciones': (lambda x: ifPosiciones(mnj=self.cm.nuevoManejador(Maestros=ifs[x]))),
-               'Tareas': (lambda x: ifTareas(mnj=self.cm.nuevoManejador(Maestros=ifs[x]))),
-               'Procesos': (lambda x: ifProcesos(mnj=self.cm.nuevoManejador(Maestros=ifs[x]))),
-               'Trabajos': (lambda x: ifTrabajos(mnj=self.cm.nuevoManejador(Maestros=ifs[x])))
+        self.uis = {'Pedidos': (lambda: ifPedidos(self.cm)), 
+               'Articulos': (lambda: ifArticulos(self.cm)),
+               'ModificadoresArt': (lambda: ifModificadoresArt(self.cm)),
+               'VariantesArt': (lambda: ifVariantesArt(self.cm)),
+               'Posiciones': (lambda: ifPosiciones(self.cm)),
+               'Tareas': (lambda: ifTareas(self.cm)),
+               'Procesos': (lambda: ifProcesos(self.cm)),
+               'Trabajos': (lambda: ifTrabajos(self.cm))
                }
 
         self.actPedidos.triggered.connect(lambda: self.abrirVentana('Pedidos'))
@@ -63,12 +63,12 @@ class MainWindow(QtWidgets.QMainWindow):
         
     def abrirVentana(self, if_nombre):
         try:    
-            ui = self.uis.get(if_nombre, lambda: None)(if_nombre)
+
+            ui = self.uis.get(if_nombre, lambda: None)()
             if ui:
                 self.mdiArea.addSubWindow(ui)
                 ui.showMaximized()
-    
-                ui.show()
+                ui.primeraAccion()
         except:
             msg = QtWidgets.QMessageBox()
             msg.setIcon(QtWidgets.QMessageBox.Information)
@@ -118,12 +118,5 @@ class MainWindow(QtWidgets.QMainWindow):
             
     def veMaestro(self, mov):
         if (self.mdiArea.activeSubWindow()) and (self.mdiArea.activeSubWindow().widget()):
-            self.mdiArea.activeSubWindow().widget().vePosicion(mov)
-    
-    
-if __name__ == "__main__":
-    import sys
-    app = QtWidgets.QApplication(sys.argv)
-    ui = MainWindow(Control('..'))
-    ui.show()
-    sys.exit(app.exec_())
+            self.mdiArea.activeSubWindow().widget().cargaMaestro(mov)
+

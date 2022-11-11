@@ -3,14 +3,16 @@ Created on 4 mar. 2019
 
 @author: cortesj
 '''
+import sys
+
 import PyQt5 as Qt5
 from PyQt5 import uic, QtWidgets
 from PyQt5.QtGui import QKeySequence
 from PyQt5.QtWidgets import QMessageBox, QShortcut
-import sys
-from DefMaestros import Maestro
-from Señales import TunelSenyal
 
+import pandas as pd
+
+from Señales import TunelSenyal
 import log
 
 
@@ -38,18 +40,16 @@ class ifDgMstBusqueda(Qt5.QtWidgets.QDialog):
     '''
     classdocs
     '''
-    def __init__(self, mnj, busq, *args, **kwargs):
+    def __init__(self, control_uinfs, tipo_maestro, campos_busqueda, campos_lista, campo_devuelto='id', *args, **kwargs):
         self.model = None # Se inicia a vacio para que se pueda identificar la falta de búsqueda
         
         # Carga los parámetros de la búsqueda
         
-        self.mnj = mnj
-        self.busq = busq
-        camposBusqueda = busq.nombresCamposBusq()
-        self.camposResultado = busq.nombresCamposResult()
+        self.mnj = control_uinfs.mnjConsulta()
+        self.campoDevuelto = campo_devuelto
                 
         super().__init__(*args, **kwargs)
-        uic.loadUi("Diseño/dgMstBusqueda.ui", self)
+        uic.loadUi('Interfaz/Diseño/dgMstBusqueda.ui', self)
 
         # Variables de la clase
         self.ifCampos = {}        
@@ -57,31 +57,34 @@ class ifDgMstBusqueda(Qt5.QtWidgets.QDialog):
         
         # Añade los campos de búsqueda
         flCampos = self.flBusqueda
-        for campo in camposBusqueda:        
+        for campo in campos_busqueda:        
             self.ifLabels[campo] = Qt5.QtWidgets.QLabel(campo, self)
             self.ifCampos[campo] = Qt5.QtWidgets.QLineEdit(self)
             flCampos.addRow(self.ifLabels[campo], self.ifCampos[campo])
         # Pone el foco en la entrada del primer campo de busqeuta
-        self.ifCampos[camposBusqueda[0]].setFocus()
+        self.ifCampos[campos_busqueda[0]].setFocus()
            
         # Conecta la señal del botón de búsqueda y de doble click sobre la tabla  
         self.pbBuscar.clicked.connect(self.buscar)
         self.qtvResultados.doubleClicked.connect(self.close)
+   
+        self.consulta = self.mnj.generaConsulta(tipo_maestro, campos_busqueda, campos_lista)
         
     '''
     Función de busqueda y de muestra de resultados
     '''
     def buscar(self):
-        mnt = {}
         for (key, item) in self.ifCampos.items():
-            if item.text() > "":
-                mnt[key] = item.text().replace(' ', '%')+'%'
-
-        cons = self.mnj.cargaConsulta(consulta=self.busq, filtro=mnt)              
-        #cons = self.mnj.consultaMaestro(self.mnt, self.camposResultado, [self.camposResultado[1]])
+            if item.text():
+                self.consulta[key] = item.text().replace(' ', '%')+'%'
+            else:
+                self.consulta[key] = None
+                
+        # Carga la consulta según los parámetros de búsqueda
+        self.consulta = self.mnj.cargaConsulta(self.consulta)
         
-        if cons:
-            self.model = self.TableModel(self.busq._resultado)
+        if not self.consulta.resultado.empty:
+            self.model = self.TableModel(self.consulta.resultado)
             self.qtvResultados.setModel(self.model)
             self.qtvResultados.setFocus()
             self.lblInfo.setText('Se han encontrado {0:d} resultados'.format(self.model.rowCount(self)))
@@ -89,7 +92,6 @@ class ifDgMstBusqueda(Qt5.QtWidgets.QDialog):
     def campoFilasSelec(self, campo):
         camposSel = []
         if self.model:
-            print (self.busq)
             valores = self.model._data[campo]
             indexes = self.qtvResultados.selectionModel().selectedRows()
             for index in sorted(indexes):
@@ -293,16 +295,20 @@ class ifRefListaD(object):
     '''
     Objetos de interfaz que muestran una referencia alfanumérica y su correspondencia en una lista desplegable
     '''
-    def __init__(self, conMst, campo, qtLineEdit, qtComboBox, lista_ids, lista_refs, lista_datos):
+    def __init__(self, conMst, campo, qtLineEdit, qtComboBox, lista_mst):
         self.qle = qtLineEdit
         self.qle.textEdited.connect(self.__cambioLE)
-        
+
+        self.lista = lista_mst[0].lista
+        campos = lista_mst[1]
+        self.lId =  ['']+[l.getId() for l in self.lista]
+        self.lRef = ['']+[l[campos[0]] for l in self.lista]
+        self.lista = ['']+self.lista
         self.qcb = qtComboBox
         self.qcb.clear()
-        self.qcb.addItems(['']+lista_datos)
-        self.lid = ['']+lista_ids
-        self.lref = ['']+lista_refs
-        self.qcb.currentIndexChanged.connect(self.__cambioCB)
+        self.qcb.addItems(['']+lista_mst[0].col(campos[1]))
+        
+        #self.qcb.currentIndexChanged.connect(self.__cambioCB)
         
         self.qcb.currentIndexChanged.connect(lambda: conMst.actualizaMaestro(campo, self.getValor())) 
         # args[0].editingFinished.connect(lambda: self.conMst.actualizaMaestro(campo, self.cmpEditables[campo].getValor()))
@@ -310,18 +316,19 @@ class ifRefListaD(object):
         
 
     def getValor(self):
-        if self.qle.text():
-            return self.lid[self.lref.index(self.qle.text())]
+        texto = self.qle.text() 
+        if texto:
+            return self.lista[self.lRef.index(texto)]
         else:
             return None
             
     def setValor(self, valor):
         self.qcb.blockSignals(True)
         if valor:
-            listind = self.lid.index(valor)
+            listind = self.lId.index(valor.getId())
             self.qcb.setCurrentIndex(listind)
             self.qle.blockSignals(True)
-            self.qle.setText(self.lref[listind])
+            self.qle.setText(self.lRef[listind])
             self.qle.blockSignals(False)
         else:
             self.limpia()
@@ -339,9 +346,9 @@ class ifRefListaD(object):
     def __cambioLE(self, dato):
         if (dato):
             try:
-                if dato in self.lref:
-                    idl = self.lid[self.lref.index(dato)]
-                    self.qcb.setCurrentIndex(self.lid.index(idl))
+                if dato in self.lRef:
+                    idl = self.lId[self.lref.index(dato)]
+                    self.qcb.setCurrentIndex(self.lId.index(idl))
             except ValueError:
                 self.qle.blockSignals(True)
                 msg = QMessageBox()
@@ -491,7 +498,7 @@ class ifTabla(object):
             self.qtw.removeRow(i)
 
 
-class ifMstConexion(object):
+class ifConexionMst(object):
     def __init__(self, manejador, tipo_maestro, funcion_enlace):
         self.log = log.ini_logger(__name__)
         # La funcion_enlace asigna la función para que el Maestro haga modificaciones en la interfaz
@@ -510,7 +517,7 @@ class ifMstConexion(object):
         self.maestro = self.mnj.nuevoMaestro(self.tipo_maestro, etiqueta=self.tipo_maestro)
         
     def actualizaMaestro(self, nombre_campo, valor):
-        self.log.info('[InterfacesloggerConexion-ActualizaMaestro: ' + str(nombre_campo + ', ' + str(valor)))
+        self.log.info('[InterfacesloggerConexion-ActualizaMaestro: ' + str(nombre_campo) + ', ' + str(valor))
 
         try:
             if '->' in nombre_campo: #Se actualiza un campo dentro de otro campo. Nprmalmente se deberá a un acceso a adjunto.
@@ -561,33 +568,26 @@ class ifMstConexion(object):
             mst = self.maestro
         return mst.getTipoCampo(nombre_campo)
                 
-    def almacenaMaestro(self):        
-        if self.mnj.almacenaMaestro(self.maestro):
-            return 1
-        else:
-            return 0
-
+    def almacenaMaestro(self):
+        self.log.info('[InterfacesloggerConexion-AlmacenaMaestro: ' + str([str(s) for s in self.mnj.session]))        
+        return self.mnj.almacena()
+        
     def borraMaestro(self):        
-        self.mnj.borraMaestro(self.maestro)
+        return self.mnj.borraMaestro(self.maestro)
     
-    def veMaestro(self, mov):
-        ''' 
-        Carga un maestro, si lo hay, dependiendo de un tipo de movimiento o de un índice de maestro (en caso de que mov sea una tupla)
-        '''
-        if (isinstance(mov, tuple)):
-            mst = self.nuevoMaestro(self.tipo_maestro, t_senyal=self.maestro._tSenyales[1])
-            mst.setId(mov) 
-            maestro = self.mnj.cargaMaestro(mst)
-        else:
-            maestro = self.mnj.cargaMaestro(self.maestro, mov=mov, sobreescribe = False, t_senyal=self.maestro._tSenyales[1])
-       
-        if maestro:
-            self.maestro = maestro
-            return 1
-        else:
-            return 0   
+    def cargaMaestro(self, mov):
+        mst = self.maestro
+        self.maestro = self.mnj.cargaMaestro(mst_ref=self.maestro, mov=mov) 
+        if not self.maestro:
+            self.mnj.session.add(mst)
+            self.maestro = mst
+        self.maestro.vaciaCamposModif()            
+        return self.maestro        
+        
+    def buscaMaestro(self, **kwargs):
+        return self.mnj.buscaMaestro(kwargs)
     
-    def mstModificado(self):
+    def modificadoMaestro(self):
         return self.maestro.modificado()
         
         
@@ -599,29 +599,39 @@ class ifMaestro(QtWidgets.QWidget):
     Interfaz de Maestro. Peunte entre usuario y el tratamiento de un maestro.
     '''
     keyPressed = Qt5.QtCore.pyqtSignal(int)    
-    def __init__(self, *args, **kwargs):
+    
+    def __init__(self, control_uinfs, *args, **kwargs):
         self.log = log.ini_logger(__name__)
-        if not("mnj" in kwargs.keys()) and not("tipo_maesetro" in kwargs.keys()):
-            raise NameError("[Interfaces] - ifMaestro->__init__: Se esperaba parámetro 'mnj' y 'tipo_maestro'.")
         
-        self.mnj = kwargs.pop('mnj')
-        self.conMst = ifMstConexion(self.mnj, kwargs['tipo_maestro'], self.trataSenyal)
-        self.conMst.senyalMaestro.asignaTunel(self.trataSenyal)
-        self.cmpEditables = {} # Contendrá los campos de la interfaz que son editables por el usuario
-      
-        try:
-            self.busqueda = self.mnj.nuevaConsultaMaestro(kwargs.pop('tipo_maestro')) # Carga la consulta de búsqueda para el maestro a tratar
-        except: # Como no todos los maestros tendrán búsqueda se trata el error poniendo la variable a None 
-            self.busqMaestro = None
-            
+        self.cuinf = control_uinfs
+        # Conexión con el Manejador y Maestro Principal
+        self.conMst = ifConexionMst(control_uinfs.mnjMaestro(), self.TipoMaestro, self.trataSenyal)
+
+        # Campso de la interfaz editables por el usuario
+        self.cmpEditables = {} 
+
         # Se llama al constructor de la SuperClase Widget
         super().__init__(*args, **kwargs)
         
-        # Se cargan los diferentes atajos de teclado y los comandos que les corresponden para tratarlos cuando se desencadenen
+        # Carga la interfaz gráfica
+        uic.loadUi('Interfaz/Diseño/Articulos/'+self.Interfaz, self)
+        
+        # Crea un diccionario con las listas predefinidas
+        self.valListas = {}
+        self.mnjl = control_uinfs.mnjListasMaestros()
+        for lista, caract in self.Listas.items():
+            self.valListas[lista] = (self.mnjl.cargaLista(tipo=caract[0], campos_lista=caract[1]), caract[1])
+
+        
+        # Crea los enlaces de campos del Maestro con campos de Interfaz
+        for campo, caract in self.Campos.items():
+            self.nuevoIfCampo(campo, caract)
+      
+        # Atajos de teclado y comandos correspondientes
         self.shortcut_open = QShortcut(QKeySequence('Ctrl+R'), self)
         self.shortcut_open.activated.connect(lambda: self.procesaAtajo('BC'))   
         #self.keyPressed.connect(self.on_key)
-            
+        
     def keyPressEvent(self, event):
         super(ifMaestro, self).keyPressEvent(event)
         self.keyPressed.emit(event.key())
@@ -648,31 +658,42 @@ class ifMaestro(QtWidgets.QWidget):
             return ''
         return str(campo)        
 
-    def nuevoIfCampo(self, campo, tipo_if, *args):
-        # Se cargan los ifCampos y sus desencadenadores al actualizarlos        
+    def guardarSiCambios (self):
+        if self.conMst.modificadoMaestro():
+            buttonReply = QMessageBox.question(self, 'Datos Modificados', "Datos modificados. ¿Desea guardarlos?", QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel, QMessageBox.Cancel)
+            if buttonReply == QMessageBox.Cancel:
+                return 0
+            elif buttonReply == QMessageBox.Yes:
+                self.conMst.almacenaMaestro()
+        return 1            
+            
+    def nuevoIfCampo(self, campo, caract):
+        # Se cargan los ifCampos y sus desencadenadores al actualizarlos
+        tipo_if = caract[0]
+               
         if (tipo_if == "ifCadena"):
-            cmpEditable = ifCadena(self.conMst, campo, args[0])
+            cmpEditable = ifCadena(self.conMst, campo, getattr(self, caract[1]))
 
         elif (tipo_if == 'ifListaD'):
-            cmpEditable = ifListaD(self.conMst, campo, args[0], args[1], args[2])
+            cmpEditable = ifListaD(self.conMst, campo, caract[1], caract[2], caract[3])
                         
         elif (tipo_if == 'ifIdListaD'):
-            cmpEditable = ifIdListaD(self.conMst, campo, args[0], args[1], args[2], args[3])
+            cmpEditable = ifIdListaD(self.conMst, campo, caract[1], caract[2], caract[3], caract[4])
 
         elif (tipo_if == 'ifRefListaD'):
-            cmpEditable = ifRefListaD(self.conMst, campo, args[0], args[1], args[2], args[3], args[4])
+            cmpEditable = ifRefListaD(self.conMst, campo,  getattr(self, caract[1]),  getattr(self, caract[2]), self.valListas[caract[3]])
                                   
         elif (tipo_if == 'ifTexto'):
-            cmpEditable = ifTexto(self.conMst, campo, args[0])
+            cmpEditable = ifTexto(self.conMst, campo, caract[1])
 
         elif (tipo_if == 'ifTabla'):
-            cmpEditable = ifTabla(self.conMst, campo, args[0], args[1], self.conMst, campo)
+            cmpEditable = ifTabla(self.conMst, campo, caract[1], caract[2], self.conMst, campo)
 
         elif (tipo_if == 'ifVerificacion'):
-            if (len(args) > 1):
-                cmpEditable = ifVerificacion(self.conMst, campo, args[0], args[1])
+            if (len(caract) > 2):
+                cmpEditable = ifVerificacion(self.conMst, campo, caract[1], caract[2])
             else:
-                cmpEditable = ifVerificacion(self.conMst, campo, args[0])
+                cmpEditable = ifVerificacion(self.conMst, campo, caract[1])
         
         # Se genera la entrada en el diccionario que contendrá los campos editables.
         #Se anidarán diccionarios en caso de que haya campos que estén den tro de campos externos o adjuntos del maestro.          
@@ -715,40 +736,39 @@ class ifMaestro(QtWidgets.QWidget):
     '''
      Operaciones del usuario sobre el maestro
     '''
+    # primeraAccion a procesar llamada por la página principal
+    def primeraAccion (self):
+        # Carga el primer maestro en la interfaz
+        self.cargaMaestro('pri')
+                
     # Fucniones de navegación sobre los maestros almacenados
-    
-    def vePosicion(self, mov):
-        if self.conMst.mstModificado():
-            buttonReply = QMessageBox.question(self, 'Datos Modificados', "Datos modificados. ¿Desea guardarlos?", QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel, QMessageBox.Cancel)
-            if buttonReply == QMessageBox.Yes:
-                if not self.conMst.almacenaMaestro():
-                    return  
-            elif buttonReply == QMessageBox.Cancel:
-                return
-        
-        if self.conMst.veMaestro(mov):
-            self.cargaIfCampos()
-        
+    def cargaMaestro(self, mov):
+        if self.guardarSiCambios():
+            if self.conMst.cargaMaestro(mov):
+                self.cargaIfCampos()
+
     def nuevo(self):
-        self.vaciaIfCampos()        
-        self.conMst.nuevoMaestro()
+        if self.guardarSiCambios():
+            self.vaciaIfCampos()        
+            self.conMst.nuevoMaestro()
                 
     def almacena(self):
         return self.conMst.almacenaMaestro()
 
     def borra(self):
-        return self.conMst.borraMaestro()
-        self.vaciaIfCampos()      
+        if self.conMst.borraMaestro():
+            self.vaciaIfCampos()      
     
     def abrirBusquedaMaestro(self):
         # Si hay definida una busqueda para el maestro se abre
-        if self.busqMaestro:
-            ui = ifDgMstBusqueda(self.mnj, self.busqMaestro)
+        if self.BusquedaMaestro and self.guardarSiCambios():
+            ui = ifDgMstBusqueda(self.cuinf, self.TipoMaestro, self.BusquedaMaestro[0], self.BusquedaMaestro[1])
             if ui:
                 ui.exec()
             campoB = ui.campoFilasSelec('id')
             if campoB:
-                self.vePosicion((campoB[0],))            
+                self.conMst.maestro.setId(int(campoB[0]))
+                self.cargaMaestro('ig')    
 
     def abrirBusquedaCampo(self, campo):
         # Abre la busqueda de un campo y devuelve el valor buscado o nada en caso de cancelar
@@ -794,25 +814,22 @@ class ifMaestro(QtWidgets.QWidget):
                         
                 if ifNombreCampo:
                     ifCampo = listaEditables[ifNombreCampo]
-                    if isinstance(mstCampo, Maestro):
-                        ifCampo.setValor(mstCampo.getIdNum())
-                    else:
-                        if (tipoCampo == 'l'):
-                            if (iSigFuente == len(fuente)):
-                                ifCampo.limpia()
-                                for i in range(mstCampo.numeroFilas()):
-                                    valores = mstCampo.getValoresCamposFila(i)
-                                    ifCampo.agregaFila(valores)
-                            else:
-                                (campo, fila) = fuente[iSigFuente]
-                                if (senyal == 'mv') and (campo in listaEditables[ifNombreCampo].campos): # Se ha modificado un valor concreto
-                                    ifCampo.setValor(fila, campo, mstCampo.getValor(fila, campo))
-                                elif (senyal == 'nf'): # Se inserta una fila
-                                    ifCampo.qtw.insertRow(fila)
-                                elif (senyal == 'bf'): # Se borra una fila
-                                    ifCampo.qtw.removeRow(fila)
+                    if (tipoCampo == 'l'):
+                        if (iSigFuente == len(fuente)):
+                            ifCampo.limpia()
+                            for i in range(mstCampo.numeroFilas()):
+                                valores = mstCampo.getValoresCamposFila(i)
+                                ifCampo.agregaFila(valores)
                         else:
-                            ifCampo.setValor(mstCampo)
+                            (campo, fila) = fuente[iSigFuente]
+                            if (senyal == 'mv') and (campo in listaEditables[ifNombreCampo].campos): # Se ha modificado un valor concreto
+                                ifCampo.setValor(fila, campo, mstCampo.getValor(fila, campo))
+                            elif (senyal == 'nf'): # Se inserta una fila
+                                ifCampo.qtw.insertRow(fila)
+                            elif (senyal == 'bf'): # Se borra una fila
+                                ifCampo.qtw.removeRow(fila)
+                    else:
+                        ifCampo.setValor(mstCampo)
                         
         except:
             msg = Qt5.QtWidgets.QMessageBox()

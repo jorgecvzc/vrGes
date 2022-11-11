@@ -10,12 +10,14 @@ class ifArticulos(ifMaestro):
     '''
     Clase para el manejo de la interfaz de la clase Trabajos
     '''
+    TipoMaestro="Articulo"
+    Interfaz = "Diseño/Articulos/wdArticulos.ui"
+    
     def __init__(self, *args, **kwargs):
         '''
         Inicia el maestro principal cuyos datos se van a tratar
         '''     
-        super().__init__(*args, **kwargs, tipo_maestro="Articulo")
-        uic.loadUi("Diseño/Articulos/wdArticulos.ui", self)
+        super().__init__(*args, **kwargs)
 
         '''
         Crea los ifCanpos que enlazaran los objetos del maestro con los de la interfaz
@@ -59,38 +61,35 @@ class ifVariantesArt(ifMaestro):
     '''
     Clase para el manejo de la interfaz de la clase ModificadoresArt
     '''
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs, tipo_maestro="VarianteArt")
-        uic.loadUi("Diseño/Articulos/wdVariantes.ui", self)
+    TipoMaestro="Articulos.Variante"
+    Interfaz = "wdVariantes.ui"
+    
+    Listas = {}
+    
+    Campos = {
+        'ref': ('ifCadena', 'leRef'),
+        'nombre': ('ifCadena', 'leNombre')
+    }
 
-        '''
-        Crea los ifCanpos que enlazaran los objetos del maestro con los de la interfaz
-        '''
-        self.nuevoIfCampo('ref', 'ifCadena', self.leRef)
-        self.nuevoIfCampo('nombre', 'ifCadena', self.leNombre)
-
-        # Carga el primer maestro en la interfaz
-        self.vePosicion('pri')
-
+    BusquedaMaestro = (['ref', 'nombre'], ['ref', 'nombre'])
+    
     
 class ifModificadoresArt(ifMaestro):
     '''
     Clase para el manejo de la interfaz de la clase ModificadoresArt
     '''
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs, tipo_maestro="ModificadorArt")
-        uic.loadUi("Diseño/Articulos/wdModificadores.ui", self)
+    TipoMaestro = "Articulos.Modificador"
+    Interfaz = "wdModificadores.ui"
+ 
+    Listas = {
+        'lVarianteArt': ('Articulos.Variante', ['ref', 'nombre'])
+    }   
+    
+    Campos = {
+        'ref': ('ifCadena', 'leRef'),
+        'nombre': ('ifCadena', 'leNombre'),
+        'variante': ('ifRefListaD', 'leVariante', 'cbVariante', 'lVarianteArt')
+    }    
 
-        '''
-        Crea los ifCanpos que enlazaran los objetos del maestro con los de la interfaz
-        '''
-        self.nuevoIfCampo('nombre', 'ifCadena', self.leNombre)
-        self.nuevoIfCampo('ref', 'ifCadena', self.leRef)
 
-        cons = self.mnj.nuevaConsultaMaestro('VarianteArt', campos_resultado=['id', 'ref', 'nombre'])
-        cons = self.mnj.cargaConsultaMaestro(cons)
-        self.nuevoIfCampo('variante', 'ifRefListaD', self.leVariante, self.cbVariante, list(cons.resultado('id')), list(cons.resultado('ref')), list(cons.resultado('nombre')))
-
-        # Carga el primer maestro en la interfaz
-        self.vePosicion('pri')
 
