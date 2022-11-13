@@ -3,7 +3,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm import declarative_base
 #
-from .Manejadores import MnjMaestro, MnjListasMaestros, MnjConsultas
+from .Manejadores import MnjMaestros, MnjConsultas
 
 
 class ControlUinfs (object):
@@ -22,15 +22,10 @@ class ControlUinfs (object):
     def generaBD(self):
         declarative_base().metadata.create_all(self.bd)
         
-    def mnjMaestro(self):
+    def mnjMaestros(self):
         # Devuelve un Manejador de Maestros
         session = sessionmaker(bind=self.bd)
-        return MnjMaestro(session())
-
-    def mnjListasMaestros(self):
-        # Devuelve un Manejador de Listas de Maestros
-        session = sessionmaker(bind=self.bd)
-        return MnjListasMaestros(session())
+        return MnjMaestros(session())
 
     def mnjConsultas(self):
         # Devuelve un Manejador de Consultas

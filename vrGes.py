@@ -7,7 +7,7 @@ import sys
 import configparser
 
 from almacen import ControlUinfs
-from mnjMwVRGES import MainWindow, QtWidgets
+from Interfaz.mnjMwVRGES import MainWindow, QtWidgets
 
 class Gestion(object):
     

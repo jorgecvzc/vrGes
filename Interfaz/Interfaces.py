@@ -299,17 +299,15 @@ class ifRefListaD(object):
         self.qle = qtLineEdit
         self.qle.textEdited.connect(self.__cambioLE)
 
-        self.lista = lista_mst[0].lista
-        campos = lista_mst[1]
-        self.lId =  ['']+[l.getId() for l in self.lista]
-        self.lRef = ['']+[l[campos[0]] for l in self.lista]
-        self.lista = ['']+self.lista
+        self.campos = lista_mst[1]
+        self.lista = lista_mst[0]
+        #self.lId =  ['']+[l.getId() for l in self.lista]
+        self.lRef = [l[self.campos[0]] for l in self.lista]
         self.qcb = qtComboBox
         self.qcb.clear()
-        self.qcb.addItems(['']+lista_mst[0].col(campos[1]))
+        self.qcb.addItems(['']+self.lista.col(self.campos[1]))
         
-        #self.qcb.currentIndexChanged.connect(self.__cambioCB)
-        
+        self.qcb.currentIndexChanged.connect(self.__cambioCB)
         self.qcb.currentIndexChanged.connect(lambda: conMst.actualizaMaestro(campo, self.getValor())) 
         # args[0].editingFinished.connect(lambda: self.conMst.actualizaMaestro(campo, self.cmpEditables[campo].getValor()))
         # args[1].activated.connect(lambda: self.conMst.actualizaMaestro(campo, self.cmpEditables[campo].getValor()))  
@@ -325,8 +323,9 @@ class ifRefListaD(object):
     def setValor(self, valor):
         self.qcb.blockSignals(True)
         if valor:
-            listind = self.lId.index(valor.getId())
-            self.qcb.setCurrentIndex(listind)
+            listind = self.lista.index(valor)
+            print(valor, listind, len(self.qcb))
+            self.qcb.setCurrentIndex(listind+1)
             self.qle.blockSignals(True)
             self.qle.setText(self.lRef[listind])
             self.qle.blockSignals(False)
@@ -347,8 +346,8 @@ class ifRefListaD(object):
         if (dato):
             try:
                 if dato in self.lRef:
-                    idl = self.lId[self.lref.index(dato)]
-                    self.qcb.setCurrentIndex(self.lId.index(idl))
+                    idl = self.lRef.index(dato) + 1
+                    self.qcb.setCurrentIndex(idl)
             except ValueError:
                 self.qle.blockSignals(True)
                 msg = QMessageBox()
@@ -362,11 +361,14 @@ class ifRefListaD(object):
                 self.qle.blockSignals(False)
                 
         else:
-            self.qcb.setCurrentText('')
+            self.qcb.setCurrentIndex(0)
             
         
     def __cambioCB(self, i):
-        self.qle.setText(str(self.lref[i]))
+        if not i:
+            self.qle.clear()
+        else:
+            self.qle.setText(str(self.lRef[i-1]))
                 
         
 class ifTabla(object):
@@ -598,14 +600,26 @@ class ifMaestro(QtWidgets.QWidget):
     '''
     Interfaz de Maestro. Peunte entre usuario y el tratamiento de un maestro.
     '''
+    TipoMaestro = ''
+    Interfaz = ''
+    ListasMst = {}
+    Campos = {}
+    BusquedaMaestro = ()
     keyPressed = Qt5.QtCore.pyqtSignal(int)    
     
     def __init__(self, control_uinfs, *args, **kwargs):
         self.log = log.ini_logger(__name__)
         
         self.cuinf = control_uinfs
+        mnj = control_uinfs.mnjMaestros()
+
+        # Crea un diccionario con las listas predefinidas
+        self.valListas = {}
+        for lista, caract in self.ListasMst.items():
+            self.valListas[lista] = (mnj.cargaLista(tipo=caract[0], campos_lista=caract[1]), caract[1])
+
         # Conexión con el Manejador y Maestro Principal
-        self.conMst = ifConexionMst(control_uinfs.mnjMaestro(), self.TipoMaestro, self.trataSenyal)
+        self.conMst = ifConexionMst(mnj, self.TipoMaestro, self.trataSenyal)
 
         # Campso de la interfaz editables por el usuario
         self.cmpEditables = {} 
@@ -615,13 +629,6 @@ class ifMaestro(QtWidgets.QWidget):
         
         # Carga la interfaz gráfica
         uic.loadUi('Interfaz/Diseño/Articulos/'+self.Interfaz, self)
-        
-        # Crea un diccionario con las listas predefinidas
-        self.valListas = {}
-        self.mnjl = control_uinfs.mnjListasMaestros()
-        for lista, caract in self.Listas.items():
-            self.valListas[lista] = (self.mnjl.cargaLista(tipo=caract[0], campos_lista=caract[1]), caract[1])
-
         
         # Crea los enlaces de campos del Maestro con campos de Interfaz
         for campo, caract in self.Campos.items():
@@ -665,6 +672,7 @@ class ifMaestro(QtWidgets.QWidget):
                 return 0
             elif buttonReply == QMessageBox.Yes:
                 self.conMst.almacenaMaestro()
+        print (self.conMst.mnj.session)
         return 1            
             
     def nuevoIfCampo(self, campo, caract):
@@ -775,7 +783,7 @@ class ifMaestro(QtWidgets.QWidget):
         externo = self.conMst.maestro.campoModifExterno(campo)
         try:
             if externo:
-                busqCampo = self.mnj.nuevaConsulta(externo) # Carga la consulta de búsqueda para el campo, si existe
+                busqCampo = self.nuevaConsulta(externo) # Carga la consulta de búsqueda para el campo, si existe
                 if busqCampo:
                     ui = ifDgMstBusqueda(self.mnj, busqCampo)
                     if ui:

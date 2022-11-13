@@ -4,7 +4,7 @@ Created on 19 dic. 2018
 @author: cortesj
 '''
 from PyQt5 import QtWidgets, QtCore, uic
-from Interfaces import ifMaestro
+from Interfaz.Interfaces import ifMaestro
 
 class ifPedidos(QtWidgets.QDialog, ifMaestro):
     '''

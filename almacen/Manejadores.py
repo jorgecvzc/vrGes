@@ -12,7 +12,7 @@ from almacen.uInfs import Maestro, Consulta, ListaMaestro
 import almacen.mstArticulos as mstArticulos
 
 
-class MnjInfs (object):
+class MnjMaestros (object):
     '''
     Clase para el manejo de maestros y almacenamientos, independientemente de la topología de estos últimos.
     '''
@@ -23,11 +23,6 @@ class MnjInfs (object):
         self.session.rollback()
         self.session.expunge_all()
 
-
-class MnjMaestro (MnjInfs):
-    '''
-    Manejador de Maestros (Unidades de Información completa de la aplicación)
-    '''
     def nuevoMaestro(self, nombre_maestro, **kwargs):
         mst = eval('mst'+nombre_maestro+'()')
         if kwargs.pop('almacenar', True):
@@ -150,8 +145,6 @@ class MnjMaestro (MnjInfs):
         else:
             return None
         
-        
-class MnjListasMaestros (MnjInfs):
     def cargaLista(self, **kwargs):
         # Carga y devuelve una lista de maestros dependiendo de las opcioens:
         #  mst_ref:  Se cargará la lista en referencia a un maestro

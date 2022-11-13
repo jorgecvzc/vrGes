@@ -48,7 +48,10 @@ class Articulo (Base):
     beneficio = Column('artBeneficio', Float(6))
     precioCompra = Column('artPrecioCompra', Float(6))
     observaciones = Column('artObservaciones',Text)
-    proveedor = Column('artProveedor', Integer)
+    proveedorId = Column('artProveedor', Integer)
+    '''Column('moaVariante', Integer, ForeignKey("VariantesArt.varId"), info={'t':'e', 'e':'VarianteArt'})
+    
+    variante = relationship('Variante')'''
     numVariantes = Column('artNumVariantes', SmallInteger, default=0)
     variante1 = Column('artVariante1', Integer, ForeignKey("VariantesArt.varId"))
     variante2 = Column('artVariante2', Integer, ForeignKey("VariantesArt.varId"))

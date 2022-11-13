@@ -109,16 +109,11 @@ class Maestro (object):
             self._tSenyales[1].emiteSenyal([self.getEtiqueta()]+fuente, senyal, *args)    
             
             
-class ListaMaestro (object):
-    def __init__ (self, lista):
-        self.lista = lista
-        
-    def __getitem__ (self, key):
-        return self.lista[key]
-    
+class ListaMaestro (list):
     def col(self, col):
-        return [c[col] for c in self.lista]
-            
+        return [c[col] for c in self]
+
+
 class Consulta (object):
     def __init__ (self, maestros, campos_busqueda, campos_resultado=['*']):
         self.maestros = maestros

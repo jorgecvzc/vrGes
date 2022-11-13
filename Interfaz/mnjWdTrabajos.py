@@ -4,7 +4,7 @@ Created on 19 dic. 2018
 @author: cortesj
 '''
 from PyQt5 import QtWidgets, uic
-from Interfaces import ifMaestro
+from Interfaz.Interfaces import ifMaestro
 
 class ifTrabajos(ifMaestro):
     '''

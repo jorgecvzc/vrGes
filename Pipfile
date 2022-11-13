@@ -4,9 +4,13 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
+pandas = "*"
+sqlalchemy = "*"
+pyqt5 = "*"
+psycopg2 = "*"
 
 [dev-packages]
-ipykernel = "*"
 
 [requires]
-python_version = "3.9"
+python_version = "3.8"
+python_full_version = "3.8.10"

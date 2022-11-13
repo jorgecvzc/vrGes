@@ -4,33 +4,30 @@ Created on 19 dic. 2018
 @author: cortesj
 '''
 from PyQt5 import QtWidgets, uic, QtCore
-from Interfaces import ifMaestro
+from Interfaz.Interfaces import ifMaestro
 
 class ifArticulos(ifMaestro):
     '''
     Clase para el manejo de la interfaz de la clase Trabajos
     '''
-    TipoMaestro="Articulo"
+    TipoMaestro="Artiuclos.Articulo"
     Interfaz = "Diseño/Articulos/wdArticulos.ui"
-    
-    def __init__(self, *args, **kwargs):
-        '''
-        Inicia el maestro principal cuyos datos se van a tratar
-        '''     
-        super().__init__(*args, **kwargs)
 
-        '''
-        Crea los ifCanpos que enlazaran los objetos del maestro con los de la interfaz
-        '''
-        self.nuevoIfCampo('ref', 'ifCadena', self.leRef)
-        self.nuevoIfCampo('nombre', 'ifCadena', self.leNombre)
-        self.nuevoIfCampo('descripcion', 'ifCadena', self.leDescripcion)
+    ListasMst = {
+        'lProveedores': ('.Proveedor', ['id', 'nombre'])
+    }       
 
-        mstPro = self.mnj.nuevoMaestro('Proveedor')
-        cons = self.mnj.consultaMaestro(mstPro, None, ['id', 'nombre'], ["nombre"])
-        self.nuevoIfCampo('proveedor', 'ifIdListaD', self.leProveedor, self.cbProveedor, list(cons['id']), list(cons['nombre']))
-        
-        self.nuevoIfCampo('observaciones', 'ifTexto', self.ptObs)
+    Campos = {
+        'ref': ('ifCadena', 'leRef'),
+        'nombre': ('ifCadena', 'leNombre'),
+        'descripcion': ('ifCadena', 'leDescripcion'),
+        'proveedor': ('ifIdListaD', 'leProveedor', 'cbProveedor', 'lProveedores'),
+        'observaciones': ('ifTexto', 'ptObs'),
+        'manufacturado': ('ifVerificacion', 'chbManufacturado')
+    }
+
+    BusquedaMaestro = (['ref', 'nombre'], ['ref', 'nombre'])    
+    '''
         self.nuevoIfCampo('manufacturado', 'ifVerificacion', self.chbManufacturado, [self.tbEscandallo])
 
         mstProc = self.mnj.nuevoMaestro('Proceso')
@@ -50,12 +47,9 @@ class ifArticulos(ifMaestro):
         twLineasTareas = {'refTarea':'Ref','nomTarea':'Tarea','tiempo':'Tiempo', 'coste':'Coste'}
         self.nuevoIfCampo('escandallo->procesoTareas', 'ifTabla', self.twTareas, twLineasTareas)        
                 
-        # Carga el primer maestro en la interfaz
-        self.vePosicion('pri')        
-
     def trataSenyal(self, fuente, senyal, *args):
         super().trataSenyal(fuente, senyal, *args)
-
+    '''        
 
 class ifVariantesArt(ifMaestro):
     '''
@@ -63,8 +57,6 @@ class ifVariantesArt(ifMaestro):
     '''
     TipoMaestro="Articulos.Variante"
     Interfaz = "wdVariantes.ui"
-    
-    Listas = {}
     
     Campos = {
         'ref': ('ifCadena', 'leRef'),
@@ -81,7 +73,7 @@ class ifModificadoresArt(ifMaestro):
     TipoMaestro = "Articulos.Modificador"
     Interfaz = "wdModificadores.ui"
  
-    Listas = {
+    ListasMst = {
         'lVarianteArt': ('Articulos.Variante', ['ref', 'nombre'])
     }   
     

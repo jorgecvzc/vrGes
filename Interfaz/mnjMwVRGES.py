@@ -6,9 +6,9 @@ Created on 4 sept. 2020
 import sys
 from PyQt5 import QtWidgets
 from PyQt5 import uic
-from mnjDgPedidos import ifPedidos
-from mnjWdArticulos import ifArticulos, ifModificadoresArt, ifVariantesArt
-from mnjWdTrabajos import ifTrabajos, ifProcesos, ifTareas, ifPosiciones
+from Interfaz.mnjDgPedidos import ifPedidos
+from Interfaz.mnjWdArticulos import ifArticulos, ifModificadoresArt, ifVariantesArt
+from Interfaz.mnjWdTrabajos import ifTrabajos, ifProcesos, ifTareas, ifPosiciones
 
 
 class MainWindow(QtWidgets.QMainWindow):
