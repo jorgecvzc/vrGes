@@ -105,7 +105,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 elif (accion == 'b'):
                     self.mdiArea.activeSubWindow().widget().abrirBusquedaMaestro()
                 elif (accion == 'i'):
-                    self.mdiArea.activeSubWindow().widget().logImpMaestro()
+                    self.mdiArea.activeSubWindow().widget().logImp()
         except:
             msg = QtWidgets.QMessageBox()
             msg.setIcon(QtWidgets.QMessageBox.Information)

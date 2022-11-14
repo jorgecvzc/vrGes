@@ -8,7 +8,7 @@ import sys
 import PyQt5 as Qt5
 from PyQt5 import uic, QtWidgets
 from PyQt5.QtGui import QKeySequence
-from PyQt5.QtWidgets import QMessageBox, QShortcut
+from PyQt5.QtWidgets import QMessageBox, QShortcut, QCompleter
 
 import pandas as pd
 
@@ -254,7 +254,6 @@ class ifIdListaD(object):
             self.qle.blockSignals(False)
         else:
             self.limpia()
-            
         self.qcb.blockSignals(False)
      
     def limpia(self):
@@ -297,12 +296,16 @@ class ifRefListaD(object):
     '''
     def __init__(self, conMst, campo, qtLineEdit, qtComboBox, lista_mst):
         self.qle = qtLineEdit
-        self.qle.textEdited.connect(self.__cambioLE)
+        #self.qle.textEdited.connect(self.__cambioLE)
+        self.qle.textChanged.connect(self.__cambioLE)
 
         self.campos = lista_mst[1]
         self.lista = lista_mst[0]
-        #self.lId =  ['']+[l.getId() for l in self.lista]
         self.lRef = [l[self.campos[0]] for l in self.lista]
+
+        qCompleter = QCompleter(self.lRef)
+        self.qle.setCompleter(qCompleter)
+
         self.qcb = qtComboBox
         self.qcb.clear()
         self.qcb.addItems(['']+self.lista.col(self.campos[1]))
@@ -324,7 +327,6 @@ class ifRefListaD(object):
         self.qcb.blockSignals(True)
         if valor:
             listind = self.lista.index(valor)
-            print(valor, listind, len(self.qcb))
             self.qcb.setCurrentIndex(listind+1)
             self.qle.blockSignals(True)
             self.qle.setText(self.lRef[listind])
@@ -672,7 +674,6 @@ class ifMaestro(QtWidgets.QWidget):
                 return 0
             elif buttonReply == QMessageBox.Yes:
                 self.conMst.almacenaMaestro()
-        print (self.conMst.mnj.session)
         return 1            
             
     def nuevoIfCampo(self, campo, caract):
@@ -853,7 +854,10 @@ class ifMaestro(QtWidgets.QWidget):
     FUNCIONES DE LOG. PARA LA VERIFICACIÓN DEL CÓDIGO DURANTE LA PROGRAMACIÓN
     '''
                                  
-    def logImpMaestro(self):
-        print(self.conMst.maestro)
-        
-                        
+    def logImp(self):
+        print('============================')
+        print('- '+str(self.conMst.mnj.session))
+        for s in self.conMst.mnj.session:
+            print (s)
+        print('============================')
+    

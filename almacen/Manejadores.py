@@ -87,11 +87,7 @@ class MnjMaestros (object):
             stmt = stmt.filter(filtro).order_by(tabla.id.asc()).limit(1)
 
         # Devuelve el resultado
-        for s in self.session:
-            print (s)
         self.session.rollback()
-        for s in self.session:
-            print (s)
         result = self.session.scalars(stmt).first()
         if result:
             return result
