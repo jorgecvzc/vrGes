@@ -7,8 +7,8 @@ import sys
 from PyQt5 import QtWidgets
 from PyQt5 import uic
 from Interfaz.mnjDgPedidos import ifPedidos
-from Interfaz.mnjWdArticulos import ifArticulos, ifModificadoresArt, ifVariantesArt
-from Interfaz.mnjWdTrabajos import ifTrabajos, ifProcesos, ifTareas, ifPosiciones
+from Interfaz.ifArticulos import ifArticulos, ifModificadoresArt, ifVariantesArt
+from Interfaz.ifTrabajos import ifTrabajos, ifProcesos, ifTareas, ifPosiciones
 
 
 class MainWindow(QtWidgets.QMainWindow):
@@ -63,7 +63,6 @@ class MainWindow(QtWidgets.QMainWindow):
         
     def abrirVentana(self, if_nombre):
         try:    
-
             ui = self.uis.get(if_nombre, lambda: None)()
             if ui:
                 self.mdiArea.addSubWindow(ui)

@@ -10,7 +10,7 @@ import pandas as pd
 
 from almacen.uInfs import Maestro, Consulta, ListaMaestro
 import almacen.mstArticulos as mstArticulos
-
+import almacen.mstTrabajos as mstTrabajos
 
 class MnjMaestros (object):
     '''
@@ -28,6 +28,16 @@ class MnjMaestros (object):
         if kwargs.pop('almacenar', True):
             self.session.add(mst)
         return mst
+
+    def descarta (self, msts=None):
+        if not msts:
+            self.session.expunge_all()
+        else:
+            if not isinstance(msts, list):
+                msts = [msts]
+            for mst in msts:
+                if mst in self.session:
+                    self.session.expunge(mst)
 
     def almacena(self):
         rst = self.session.commit()
@@ -51,12 +61,12 @@ class MnjMaestros (object):
             ref = kwargs['mst_ref']
             tabla = ref.__class__
             # Si el maestro tiene Id se buscará con respecto a el.
-            # Si no se recuperarán los campos modificados, si los hubiera,  como campos de búsqueda. 
-            if ref.getId() and not (mov in ['pri', 'ult']):
-                campos = [(getattr(tabla, 'id'), ref.getId())]
-            elif ref._camposModif:
-                campos = [(getattr(tabla, campo), ref[campo]) for campo in ref._camposModif]
-            self.session.expunge(ref)
+            # Si no se recuperarán los campos modificados, si los hubiera,  como campos de búsqueda.
+            if not (mov in ['pri', 'ult']):
+                if ref.getId():
+                    campos = [(getattr(tabla, 'id'), ref.getId())]
+                elif ref._camposModif:
+                    campos = [(getattr(tabla, campo), ref[campo]) for campo in ref._camposModif]
 
         # En caso contrario será una tupla con la información
         elif 'tipo' in kwargs:
@@ -173,14 +183,25 @@ class MnjMaestros (object):
         
         if 'campos_lista' in kwargs:
             stmt = stmt.options(load_only(*kwargs['campos_lista']))
+
+        if 'orden' in kwargs:
+            stmt = stmt.order_by(getattr(tabla, kwargs.pop('orden')))
             
+                                
         # Devuelve el resultado        
         result = self.session.scalars(stmt).all()
         if result:
             return ListaMaestro(result)
         else:
             return None
-        
+
+    def borraMaestro(self, msts):
+        if not isinstance(msts, list):
+            msts = [msts]
+        for mst in msts:
+            if mst in self.session:
+                self.session.delete(mst)
+        return self.session.commit()
         
 class MnjConsultas (object):
     def __init__(self, conn):

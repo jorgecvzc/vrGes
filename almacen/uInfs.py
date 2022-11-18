@@ -11,6 +11,8 @@ import pandas as pd
 
 from Señales import TunelSenyal
 
+Base = orm.declarative_base()
+
 class Maestro (object):
     
     def __init__ (self):
@@ -41,7 +43,9 @@ class Maestro (object):
     def __getitem__ (self, key):
         return getattr(self, key)
 
-    def getTipoCampo(self, campo):        
+    def getTipoCampo(self, campo):    
+        print(campo, type(self.__class__.variante.property))
+        print ("******",campo," " , getattr(self, campo).c.type)    
         return ''
     
     def getCamposModif(self):

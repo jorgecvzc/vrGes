@@ -15,7 +15,6 @@ import pandas as pd
 from Señales import TunelSenyal
 import log
 
-
 '''
 CLASE PARA MANEJAR EL DIALOGO DE BUSQUEDA DE MAESTRO
 '''
@@ -45,7 +44,7 @@ class ifDgMstBusqueda(Qt5.QtWidgets.QDialog):
         
         # Carga los parámetros de la búsqueda
         
-        self.mnj = control_uinfs.mnjConsulta()
+        self.mnj = control_uinfs.mnjConsultas()
         self.campoDevuelto = campo_devuelto
                 
         super().__init__(*args, **kwargs)
@@ -301,7 +300,7 @@ class ifRefListaD(object):
 
         self.campos = lista_mst[1]
         self.lista = lista_mst[0]
-        self.lRef = [l[self.campos[0]] for l in self.lista]
+        self.lRef = [str(l[self.campos[0]]) for l in self.lista]
 
         qCompleter = QCompleter(self.lRef)
         self.qle.setCompleter(qCompleter)
@@ -377,12 +376,12 @@ class ifTabla(object):
     '''
     Objetos de interfaz para el manejo de tablas
     '''
-    def __init__(self, conMst, campo, qtTableWidget, dict_cols, con_mst, mst_campo):
+    def __init__(self, conMst, campo, qtTableWidget, dict_cols):
         self.qtw = qtTableWidget
         self.campos = list(dict_cols.keys())
         # Los objetos complejos tienen que tener acceso al maestro ya que tienen señales internas de modificación
-        self.conMst = con_mst
-        self.mstCampo = mst_campo
+        self.conMst = conMst
+        self.mstCampo = campo
         # Se crean las columnas de la tabla según la lista paada
         self.qtw.setColumnCount(len(self.campos))
         i = 0
@@ -517,9 +516,6 @@ class ifConexionMst(object):
         self.maestro.asignaTunelSenyal(self.senyalMaestro)
         self.senyalMaestro.habilitaTunel()
 
-    def nuevoMaestro(self):
-        self.maestro = self.mnj.nuevoMaestro(self.tipo_maestro, etiqueta=self.tipo_maestro)
-        
     def actualizaMaestro(self, nombre_campo, valor):
         self.log.info('[InterfacesloggerConexion-ActualizaMaestro: ' + str(nombre_campo) + ', ' + str(valor))
 
@@ -572,6 +568,10 @@ class ifConexionMst(object):
             mst = self.maestro
         return mst.getTipoCampo(nombre_campo)
                 
+    def nuevoMaestro(self):
+        self.mnj.descarta(self.maestro)        
+        self.maestro = self.mnj.nuevoMaestro(self.tipo_maestro, etiqueta=self.tipo_maestro)
+                
     def almacenaMaestro(self):
         self.log.info('[InterfacesloggerConexion-AlmacenaMaestro: ' + str([str(s) for s in self.mnj.session]))        
         return self.mnj.almacena()
@@ -580,13 +580,12 @@ class ifConexionMst(object):
         return self.mnj.borraMaestro(self.maestro)
     
     def cargaMaestro(self, mov):
-        mst = self.maestro
-        self.maestro = self.mnj.cargaMaestro(mst_ref=self.maestro, mov=mov) 
-        if not self.maestro:
-            self.mnj.session.add(mst)
+        mst = self.mnj.cargaMaestro(mst_ref=self.maestro, mov=mov) 
+        if mst and mst != self.maestro:
+            self.mnj.descarta(self.maestro)
             self.maestro = mst
-        self.maestro.vaciaCamposModif()            
-        return self.maestro        
+            self.maestro.vaciaCamposModif()            
+        return mst        
         
     def buscaMaestro(self, **kwargs):
         return self.mnj.buscaMaestro(kwargs)
@@ -618,7 +617,8 @@ class ifMaestro(QtWidgets.QWidget):
         # Crea un diccionario con las listas predefinidas
         self.valListas = {}
         for lista, caract in self.ListasMst.items():
-            self.valListas[lista] = (mnj.cargaLista(tipo=caract[0], campos_lista=caract[1]), caract[1])
+            self.valListas[lista] = (mnj.cargaLista(tipo=caract[0], campos_lista=caract[1], orden=caract[1][1]), 
+                                     caract[1])
 
         # Conexión con el Manejador y Maestro Principal
         self.conMst = ifConexionMst(mnj, self.TipoMaestro, self.trataSenyal)
@@ -630,7 +630,7 @@ class ifMaestro(QtWidgets.QWidget):
         super().__init__(*args, **kwargs)
         
         # Carga la interfaz gráfica
-        uic.loadUi('Interfaz/Diseño/Articulos/'+self.Interfaz, self)
+        uic.loadUi('Interfaz/Diseño/'+self.Interfaz, self)
         
         # Crea los enlaces de campos del Maestro con campos de Interfaz
         for campo, caract in self.Campos.items():
@@ -667,15 +667,6 @@ class ifMaestro(QtWidgets.QWidget):
             return ''
         return str(campo)        
 
-    def guardarSiCambios (self):
-        if self.conMst.modificadoMaestro():
-            buttonReply = QMessageBox.question(self, 'Datos Modificados', "Datos modificados. ¿Desea guardarlos?", QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel, QMessageBox.Cancel)
-            if buttonReply == QMessageBox.Cancel:
-                return 0
-            elif buttonReply == QMessageBox.Yes:
-                self.conMst.almacenaMaestro()
-        return 1            
-            
     def nuevoIfCampo(self, campo, caract):
         # Se cargan los ifCampos y sus desencadenadores al actualizarlos
         tipo_if = caract[0]
@@ -693,16 +684,13 @@ class ifMaestro(QtWidgets.QWidget):
             cmpEditable = ifRefListaD(self.conMst, campo,  getattr(self, caract[1]),  getattr(self, caract[2]), self.valListas[caract[3]])
                                   
         elif (tipo_if == 'ifTexto'):
-            cmpEditable = ifTexto(self.conMst, campo, caract[1])
+            cmpEditable = ifTexto(self.conMst, campo, getattr(self, caract[1]))
 
         elif (tipo_if == 'ifTabla'):
-            cmpEditable = ifTabla(self.conMst, campo, caract[1], caract[2], self.conMst, campo)
+            cmpEditable = ifTabla(self.conMst, campo, getattr(self, caract[1]), caract[2])
 
         elif (tipo_if == 'ifVerificacion'):
-            if (len(caract) > 2):
-                cmpEditable = ifVerificacion(self.conMst, campo, caract[1], caract[2])
-            else:
-                cmpEditable = ifVerificacion(self.conMst, campo, caract[1])
+            cmpEditable = ifVerificacion(self.conMst, campo, getattr(self, caract[1]), [getattr(self, cmp) for cmp in caract[2]])
         
         # Se genera la entrada en el diccionario que contendrá los campos editables.
         #Se anidarán diccionarios en caso de que haya campos que estén den tro de campos externos o adjuntos del maestro.          
@@ -741,6 +729,14 @@ class ifMaestro(QtWidgets.QWidget):
         self.vaciaIfCampos()
         cargaRIfC([self.conMst.tipo_maestro], self.cmpEditables)    
         
+    def guardarSiCambios (self):
+        if self.conMst.modificadoMaestro():
+            buttonReply = QMessageBox.question(self, 'Datos Modificados', "Datos modificados. ¿Desea guardarlos?", QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel, QMessageBox.Cancel)
+            if buttonReply == QMessageBox.Cancel:
+                return 0
+            elif buttonReply == QMessageBox.Yes:
+                self.conMst.almacenaMaestro()
+        return 1            
     
     '''
      Operaciones del usuario sobre el maestro
@@ -748,13 +744,17 @@ class ifMaestro(QtWidgets.QWidget):
     # primeraAccion a procesar llamada por la página principal
     def primeraAccion (self):
         # Carga el primer maestro en la interfaz
-        self.cargaMaestro('pri')
+        if not self.cargaMaestro('pri'):
+            self.conMst.nuevoMaestro()
                 
     # Fucniones de navegación sobre los maestros almacenados
     def cargaMaestro(self, mov):
         if self.guardarSiCambios():
             if self.conMst.cargaMaestro(mov):
                 self.cargaIfCampos()
+                return True
+            else:
+                return False
 
     def nuevo(self):
         if self.guardarSiCambios():
@@ -765,8 +765,10 @@ class ifMaestro(QtWidgets.QWidget):
         return self.conMst.almacenaMaestro()
 
     def borra(self):
-        if self.conMst.borraMaestro():
-            self.vaciaIfCampos()      
+        buttonReply = QMessageBox.question(self, 'Eliminación', "¿Desea eliminar el registro actual?", QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+        if buttonReply == QMessageBox.Yes:
+            if self.conMst.borraMaestro():
+                self.vaciaIfCampos()      
     
     def abrirBusquedaMaestro(self):
         # Si hay definida una busqueda para el maestro se abre
@@ -829,6 +831,7 @@ class ifMaestro(QtWidgets.QWidget):
                             for i in range(mstCampo.numeroFilas()):
                                 valores = mstCampo.getValoresCamposFila(i)
                                 ifCampo.agregaFila(valores)
+                        '''
                         else:
                             (campo, fila) = fuente[iSigFuente]
                             if (senyal == 'mv') and (campo in listaEditables[ifNombreCampo].campos): # Se ha modificado un valor concreto
@@ -837,6 +840,7 @@ class ifMaestro(QtWidgets.QWidget):
                                 ifCampo.qtw.insertRow(fila)
                             elif (senyal == 'bf'): # Se borra una fila
                                 ifCampo.qtw.removeRow(fila)
+                        '''
                     else:
                         ifCampo.setValor(mstCampo)
                         
@@ -860,4 +864,7 @@ class ifMaestro(QtWidgets.QWidget):
         for s in self.conMst.mnj.session:
             print (s)
         print('============================')
+        print(self.conMst.maestro._camposModif)
+        print(self.conMst.mnj.session.is_modified(self.conMst.maestro))
+
     

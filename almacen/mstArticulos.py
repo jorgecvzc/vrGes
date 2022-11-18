@@ -8,60 +8,12 @@ from sqlalchemy import (
     Boolean
 )
 from sqlalchemy.schema import ForeignKey
-from sqlalchemy.orm import declarative_base
-from sqlalchemy.orm import relationship, sessionmaker
+from sqlalchemy.orm import relationship
 
-from .uInfs import Maestro
+from .uInfs import Base, Maestro
 
-Base = declarative_base()
 
-''' Sección para los Artículos y sus procesos '''
-
-class Proceso (Base):
-    __tablename__ = 'Procesos'
-    
-    id = Column('proId', Integer, primary_key=True)
-    nombre = Column('proNombre', String(50))
-    ref = Column('proRef', String(3))
-    observaciones= Column('proObs', String(150))
-     
-class Tarea (Base):
-    __tablename__ = 'Tareas'
-    
-    id = Column('tarId', Integer, primary_key=True)
-    ref = Column('tarRef', String(3), nullable=False)
-    nombre = Column('tarNombre', String(100), nullable=False)
-    descripcion = Column('tarDescripcion', String(150))
-
-    def __str__ (self):
-        return '<Tarea (Ref="%s", Nombre="%s")' % (self.ref, self.nombre)
-    
-class Articulo (Base):
-    __tablename__ = 'Articulos'
- 
-    id = Column('artId', Integer, primary_key=True)
-    ref = Column('artRef', String(20), nullable=False, unique=True)
-    refAsociada = Column('artRefAsociada', String(20))
-    nombre = Column('artNombre', String(100))
-    descripcion = Column('artDescripcion', String(250))
-    precio = Column('artPrecio', Float(6))
-    beneficio = Column('artBeneficio', Float(6))
-    precioCompra = Column('artPrecioCompra', Float(6))
-    observaciones = Column('artObservaciones',Text)
-    proveedorId = Column('artProveedor', Integer)
-    '''Column('moaVariante', Integer, ForeignKey("VariantesArt.varId"), info={'t':'e', 'e':'VarianteArt'})
-    
-    variante = relationship('Variante')'''
-    numVariantes = Column('artNumVariantes', SmallInteger, default=0)
-    variante1 = Column('artVariante1', Integer, ForeignKey("VariantesArt.varId"))
-    variante2 = Column('artVariante2', Integer, ForeignKey("VariantesArt.varId"))
-    variante3 = Column('artVariante3', Integer, ForeignKey("VariantesArt.varId"))
-    control = Column('artControl', SmallInteger, default=0)
-    manufacturado = Column('artManufacturado', Boolean)
-
-    def __str__(self):
-        return "<Articulo (Ref='%s', Nombre='%s')>" % (self.artRef, self.artNombre)    
-
+''' Sección para los Artículos '''
 
 class Variante (Maestro, Base):
     __tablename__ = 'VariantesArt'
@@ -78,38 +30,76 @@ class Modificador (Maestro, Base):
     __tablename__ = 'ModificadoresArt'
     
     id = Column('moaId', Integer, primary_key=True)
-    ref = Column('moaRef', String(6), nullable=False, info={'t':'t'})
-    nombre = Column('moaNombre', String(50), info={'t':'t'})
-    varianteId = Column('moaVariante', Integer, ForeignKey("VariantesArt.varId"), info={'t':'e', 'e':'VarianteArt'})
+    ref = Column('moaRef', String(6), nullable=False)
+    nombre = Column('moaNombre', String(50))
+    varianteId = Column('moaVariante', Integer, ForeignKey("VariantesArt.varId"))
     
     variante = relationship('Variante')
 
     def __str__(self):
         return "<mst: Articulo.Modificador (Ref='%s', Nombre='%s', id_variante='%s')>" % (self.ref, self.nombre, str(self.varianteId))
+        
 
+class Articulo (Maestro, Base):
+    __tablename__ = 'Articulos'
+ 
+    id = Column('artId', Integer, primary_key=True)
+    ref = Column('artRef', String(20), nullable=False, unique=True)
+    refAsociada = Column('artRefAsociada', String(20), nullable=True)
+    nombre = Column('artNombre', String(100), default='')
+    descripcion = Column('artDescripcion', String(250), nullable=True)
+    precio = Column('artPrecio', Float(6), default = 0.0)
+    beneficio = Column('artBeneficio', Float(6), nullable=True)
+    precioCompra = Column('artPrecioCompra', Float(6), nullable=True)
+    observaciones = Column('artObservaciones',Text, nullable=True)
+    proveedorId = Column('artProveedor', Integer, ForeignKey("Proveedores.proId"))
     
-class ArtEscandallo (Base):
-    __tablename__ = 'ArtEscandallo'
+    proveedor = relationship('Proveedor')
     
-    articulo = Column('areArticulo', Integer, ForeignKey("Articulos.artId"), primary_key=True)
-    proceso = Column('areProceso', Integer, ForeignKey("Procesos.proId"), primary_key=True)
+    numVariantes = Column('artNumVariantes', SmallInteger, default=0)
+    variante1 = Column('artVariante1', Integer, ForeignKey("VariantesArt.varId"))
+    variante2 = Column('artVariante2', Integer, ForeignKey("VariantesArt.varId"))
+    variante3 = Column('artVariante3', Integer, ForeignKey("VariantesArt.varId"))
+    
+    #manufacturado = Column('artManufacturado', Boolean, server_default=false(), nullable=False)
+    manufacturado = Column('artManufacturado', Boolean, default=False)
+    escandallo = relationship('Escandallo', back_populates="articulo", uselist=False)
+    
+    '''Column('moaVariante', Integer, ForeignKey("VariantesArt.varId"), info={'t':'e', 'e':'VarianteArt'})
+    
+    variante = relationship('Variante')
+    
+    control = Column('artControl', SmallInteger, default=0)
+    
+    '''
+    def __str__(self):
+        return "<Articulo (Ref='%s', Nombre='%s')>" % (self.ref, self.nombre)    
 
 
-class ArticuloDespiece (Base):
-    __tablename__ = 'ArticulosDespieces'
+class Escandallo (Base):
+    __tablename__ = 'ArtEscandallos'
     
-    articuloId = Column('artdeArticulo', Integer, ForeignKey("Articulos.artId"), primary_key=True)
-    id = Column('artdeId', Integer, primary_key=True)
-    orden = Column('artdeOrden', SmallInteger)
-    ref = Column('artdeRef', String(3))
-    pieza = Column('artdePieza', String(30))
-    materialId = Column('artdeMaterial', Integer, ForeignKey("Articulos.artId"))
-    medida1 = Column('artdeMedida1', Float(6))
-    medida2 = Column('artdeMedida2', Float(6))
-    area = Column('artdeArea', Float(6))
-    descripcion = Column('artdeDescripcion', String(50))
+    articuloId = Column('areId', Integer, ForeignKey("Articulos.artId"), primary_key=True)
+    articulo = relationship('Articulo', back_populates="escandallo")
+    proceso = Column('areProceso', Integer, ForeignKey("Procesos.proId"))
+    despiece = relationship('EscandalloDespiece')
+
+
+class EscandalloDespiece (Base):
+    __tablename__ = 'ArtEscDespieces'
     
-    def __repr__ (self):
+    escandalloId = Column('aredeEscandallo', Integer, ForeignKey("ArtEscandallos.areId"), primary_key=True)
+    id = Column('aredeId', Integer, primary_key=True)
+    orden = Column('aredeOrden', SmallInteger)
+    ref = Column('aredeRef', String(3))
+    pieza = Column('aredePieza', String(30))
+    materialId = Column('aredeMaterial', Integer, ForeignKey("Articulos.artId"))
+    medida1 = Column('aredeMedida1', Float(6))
+    medida2 = Column('aredeMedida2', Float(6))
+    area = Column('aredeArea', Float(6))
+    descripcion = Column('aredeDescripcion', String(50))
+    
+    def __str__ (self):
         return '<ArticuloDespiece (Articulo=%s, Ref=%s, Material=%s)>'  % (self.articuloId, self.ref, self.materialId)
     
 class ArticuloStock (Base):
@@ -165,7 +155,7 @@ class PedidoLineas (Base):
     artRef = Column('pedliArtRef', String(20), info={'t':'t'})
     
 
-class Proveedor (Base):
+class Proveedor (Maestro, Base):
     __tablename__ = 'Proveedores'
     
     id = Column('proId', Integer, primary_key=True)

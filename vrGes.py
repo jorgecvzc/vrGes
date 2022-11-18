@@ -6,8 +6,11 @@ Created on 27 dic. 2018
 import sys
 import configparser
 
+from Utils import BDMantenimiento
+
 from almacen import ControlUinfs
 from Interfaz.mnjMwVRGES import MainWindow, QtWidgets
+
 
 class Gestion(object):
     
@@ -33,8 +36,11 @@ def main():
     g = Gestion('..')
 
     if 'generabd' in sys.argv:
-        g.cUInf.generaBD()
+        BDMantenimiento.CreaTablas(g.cUInf.bd)
 
+    elif 'borrabd' in sys.argv:
+        BDMantenimiento.BorraTablas(g.cUInf.bd)
+        
     else:
         app = QtWidgets.QApplication(sys.argv)
         ui = MainWindow(g.cUInf)

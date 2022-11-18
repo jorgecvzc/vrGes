@@ -5,7 +5,6 @@ from sqlalchemy.orm import declarative_base
 #
 from .Manejadores import MnjMaestros, MnjConsultas
 
-
 class ControlUinfs (object):
 
     '''
@@ -18,9 +17,6 @@ class ControlUinfs (object):
         self.bd = create_engine(conf_conexion["Motor"]+'://'+ 
                                 conf_conexion["Usuario"]+':'+conf_conexion["Clave"]+'@'+
                                 conf_conexion["Servidor"]+':5432/'+conf_conexion["NombreBD"], echo=False)
-
-    def generaBD(self):
-        declarative_base().metadata.create_all(self.bd)
         
     def mnjMaestros(self):
         # Devuelve un Manejador de Maestros

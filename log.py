@@ -2,7 +2,7 @@ import logging
 
 APP_LOGGER_NAME = 'VRGes'
 
-def ini_logger(logger_name = APP_LOGGER_NAME, file_name=None):
+def ini_logger(logger_name = APP_LOGGER_NAME, file_name=None, level=0):
     logger = logging.getLogger(logger_name)
     logger.setLevel(logging.DEBUG)
     #logger.setLevel(0)

@@ -3,10 +3,31 @@ Created on 19 dic. 2018
 
 @author: cortesj
 '''
-from PyQt5 import QtWidgets, uic
+from PyQt5 import QtWidgets, uic, QtCore
 from Interfaz.Interfaces import ifMaestro
 
 class ifTrabajos(ifMaestro):
+    '''
+    Clase para el manejo de la interfaz del maestro Proceso
+    '''
+    TipoMaestro="Articulos.Articulo"
+    Interfaz = "wdArticulos.ui"
+
+    ListasMst = {
+        'lProveedores': ('Articulos.Proveedor', ['id', 'nombre'])
+    }       
+
+    Campos = {
+        'ref': ('ifCadena', 'leRef'),
+        'nombre': ('ifCadena', 'leNombre'),
+        'descripcion': ('ifCadena', 'leDescripcion'),
+        'proveedor': ('ifRefListaD', 'leProveedor', 'cbProveedor', 'lProveedores'),
+        'observaciones': ('ifTexto', 'ptObs'),
+        'manufacturado': ('ifVerificacion', 'chbManufacturado', ['tbEscandallo']),
+        'numVariantes': ('ifCadena', 'leNumVariantes')
+    }
+
+    BusquedaMaestro = (['ref', 'nombre'], ['ref', 'nombre'])        
     '''
     Clase para el manejo de la interfaz de la clase Trabajos
     '''
@@ -41,22 +62,33 @@ class ifProcesos(ifMaestro):
     '''
     Clase para el manejo de la interfaz de la clase Procesos
     '''
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs, tipo_maestro="Proceso")
-        uic.loadUi("Diseño/wdProcesos.ui", self)
 
-        '''
-        Crea los ifCanpos que enlazaran los objetos del maestro con los de la interfaz
-        '''
-        self.nuevoIfCampo('ref', 'ifCadena', self.leRef)
-        self.nuevoIfCampo('nombre', 'ifCadena', self.leNombre)
-        self.nuevoIfCampo('observaciones', 'ifTexto', self.ptObs)
+    TipoMaestro="Trabajos.Proceso"
+    Interfaz = "wdProcesos.ui"
 
-        self.twLineasCols = {'refTarea':'Tarea','nomTarea':'Nombre', 'unica':'Tarea Única', 'observaciones':'Observaciones'}
-        self.nuevoIfCampo('tareas', 'ifTabla', self.twTareas, self.twLineasCols)
+    twLineasCols = {'refTarea':'Tarea','nomTarea':'Nombre', 'unica':'Tarea Única', 'observaciones':'Observaciones'}
+    
+    Campos = {
+        'ref': ('ifCadena', 'leRef'),
+        'nombre': ('ifCadena', 'leNombre'),
+        'observaciones': ('ifTexto', 'ptObs'),
+        'tareas': ('ifTabla', 'twTareas', twLineasCols)
+    }
 
-        # Carga el primer maestro en la interfaz
-        self.vePosicion('p')
+    
+    BusquedaMaestro = (['ref', 'nombre'], ['ref', 'nombre'])    
+
+    
+
+
+    '''
+    Crea los ifCanpos que enlazaran los objetos del maestro con los de la interfaz
+
+    
+    self.nuevoIfCampo('tareas', 'ifTabla', self.twTareas, self.twLineasCols)
+
+    # Carga el primer maestro en la interfaz
+    self.vePosicion('p')
         
     def actualizaMaestro(self, nombre_campo, valor):
         # Si se ha modificado un referencia de tarea en la lista de tareas se deshabilita su señal para que no hayan bucles
@@ -74,24 +106,21 @@ class ifProcesos(ifMaestro):
         else:
             super().actualizaMaestro(nombre_campo, valor)
     
-    
+    '''
 class ifTareas(ifMaestro):
     '''
-    Clase para el manejo de la interfaz de la clase Tareas
+    Clase para el manejo de la interfaz del maestro Tarea
     '''
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs, tipo_maestro="Tarea")
-        uic.loadUi("Diseño/wdTareas.ui", self)
+    TipoMaestro="Trabajos.Tarea"
+    Interfaz = "wdTareas.ui"
 
-        '''
-        Crea los ifCanpos que enlazaran los objetos del maestro con los de la interfaz
-        '''
-        self.nuevoIfCampo('ref', 'ifCadena', self.leRef)
-        self.nuevoIfCampo('nombre', 'ifCadena', self.leNombre)
-        self.nuevoIfCampo('descripcion', 'ifCadena', self.leDescripcion)
+    Campos = {
+        'ref': ('ifCadena', 'leRef'),
+        'nombre': ('ifCadena', 'leNombre'),
+        'descripcion': ('ifCadena', 'leDescripcion'),
+    }
 
-        # Carga el primer maestro en la interfaz
-        self.vePosicion('p')
+    BusquedaMaestro = (['ref', 'nombre'], ['ref', 'nombre'])    
 
        
 class ifPosiciones(ifMaestro):
