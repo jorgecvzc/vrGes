@@ -7,19 +7,15 @@ if __name__ == "__main__":
             print (s)
         print('============================')
     
+    
     g = Gestion('..')    
     mnj = g.cUInf.mnjMaestros()
     mnjc = g.cUInf.mnjConsultas()
     sss = mnj.session
     
-    mst = mnj.nuevoMaestro('Articulos.Modificador', almacenar=False)
+    mst = mnj.nuevoMaestro('Trabajos.Proceso')
+    mst.nuevaLinea('tareas')
+    mst['tareas'][0]['tareaRef'] = 'a'
 
-    mstl1 = mnj.cargaLista(mst_ref=mst)
-
-    mst2 = mnj.nuevoMaestro('Articulos.Variante', almacenar=False)
-
-    mstl2 = mnj.cargaLista(mst_ref=mst2)
-    
-    print (mstl1)
-
-    mnj.cargaLista(tipo='Articulos.Variante', campos_lista=['ref', 'nombre'])
+    for l in mst.tareas:
+        print (l)

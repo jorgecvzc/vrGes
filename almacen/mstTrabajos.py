@@ -10,7 +10,7 @@ from sqlalchemy import (
 from sqlalchemy.schema import ForeignKey
 from sqlalchemy.orm import relationship
 
-from .uInfs import Base, Maestro
+from .uInfs import Base, Maestro, MaestroLineas
 
 
 ''' Sección de los Trabajos sobre Artículos '''
@@ -26,7 +26,7 @@ class Tarea (Maestro, Base):
     def __str__ (self):
         return '<Tarea (Ref="%s", Nombre="%s")' % (self.ref, self.nombre)
     
-class Proceso (Maestro, Base):
+class Proceso (MaestroLineas, Base):
     __tablename__ = 'Procesos'
     
     id = Column('proId', Integer, primary_key=True)
@@ -34,12 +34,12 @@ class Proceso (Maestro, Base):
     ref = Column('proRef', String(3))
     observaciones= Column('proObs', String(150), nullable=True)
     
-    tareas = relationship('ProcesoTareas')
+    tareas = relationship('ProcesoTarea')
     
     def __str__ (self):
         return '<Proceso (Ref="%s", Nombre="%s")' % (self.ref, self.nombre)    
 
-class ProcesoTareas (Maestro, Base):
+class ProcesoTarea (Maestro, Base):
     __tablename__ = 'ProcesosTareas'
     
     procesoId = Column('protaProceso', Integer, ForeignKey("Procesos.proId"), primary_key=True)
@@ -49,5 +49,8 @@ class ProcesoTareas (Maestro, Base):
     tareaRef = Column('protaTareaRef', String(1))
     observaiones = Column('protaObs', String(150), nullable=True)
     unica = Column('protaUnica', Boolean, default=False)
+
+    def __str__ (self):
+        return '<Tarea de Proceso (Línea="%s", Tarea="%s")' % (self.orden, self.tareaRef)
 
 

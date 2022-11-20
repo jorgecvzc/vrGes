@@ -111,8 +111,19 @@ class Maestro (object):
         # Pasa la señal al siguiente receptor si lo hubiera
         if self._tSenyales[1]:
             self._tSenyales[1].emiteSenyal([self.getEtiqueta()]+fuente, senyal, *args)    
-            
-            
+
+class MaestroLineas (Maestro):
+    def nuevaLinea(self, campo):
+        lin = eval('self.__class__.'+campo+'.property.mapper.class_()')
+        if len(self[campo]):
+            pass
+        else:
+            lin['id'] = 1
+            lin['orden'] = 1
+        self[campo].append(lin)
+        return lin
+
+
 class ListaMaestro (list):
     def col(self, col):
         return [c[col] for c in self]

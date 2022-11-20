@@ -3,6 +3,8 @@ Created on 27 oct. 2022
 
 @author: cortesj
 '''
+import importlib
+
 from sqlalchemy import select, func, and_, or_, text, asc, desc
 from sqlalchemy.orm import load_only
 
@@ -24,7 +26,9 @@ class MnjMaestros (object):
         self.session.expunge_all()
 
     def nuevoMaestro(self, nombre_maestro, **kwargs):
-        mst = eval('mst'+nombre_maestro+'()')
+        m = importlib.import_module('.mstTrabajos', 'almacen')
+        mst = getattr(m, 'Proceso')()
+        # mst = eval('mst'+nombre_maestro+'()')
         if kwargs.pop('almacenar', True):
             self.session.add(mst)
         return mst
@@ -72,8 +76,9 @@ class MnjMaestros (object):
         elif 'tipo' in kwargs:
             tipo = kwargs['tipo']
             tabla = eval('mst'+tipo)
-            filtro = kwargs.pop('filtro', [])
-            campos = [(getattr(tabla, campo), valor) for campo, valor in filtro['campos'].items()]
+            filtro = kwargs.pop('filtro', {'campos':{}})
+            if filtro:
+                campos = [(getattr(tabla, campo), valor) for campo, valor in filtro['campos'].items()]
         
         else:
             raise NameError ('MnjMaestro->cargaMaestro: Debe haber un "mst_ref" o "tipo"')
