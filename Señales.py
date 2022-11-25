@@ -27,7 +27,7 @@ class TunelSenyal(object):
     def emiteSenyal (self, fuente, senyal, *args):
         # print(fuente, senyal, args)
         if self._tunelHabilitado and self._tunel:
-            if not ((fuente, senyal) in self._senyalesApagadas) or (('*', senyal) in self._senyalesApagadas) or ((fuente, '*') in self._senyalesApagadas):
+            if not (tuple(fuente) in self._senyalesApagadas) or (('*', fuente[-1]) in self._senyalesApagadas) or ((fuente[0], '*') in self._senyalesApagadas):
                 self._tunel(fuente, senyal, *args)
 
     def habilitaTunel(self):

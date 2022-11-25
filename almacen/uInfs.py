@@ -8,8 +8,10 @@ Clases para las funcionalidades internas de los diferentes Unidades de Informaci
 from sqlalchemy import orm
 import pandas as pd
 
-
 from Señales import TunelSenyal
+
+import log
+logger = log.get_logger(__name__, 'vrGes.Sec')
 
 Base = orm.declarative_base()
 
@@ -19,9 +21,14 @@ class Maestro (object):
         self.etiqueta = ''
         self._camposModif = []
 
+        for attr in self.__mapper__.column_attrs:
+            col = attr.columns[0]
+            if col.default and not callable(col.default.arg):
+                setattr(self, attr.key, col.default.arg)
+
         self._tSenyales = [TunelSenyal(self.etiqueta), None] # Objeto con dos tuneles de señal. El primero el entrante para recibier señalesy el segundo el saliente para mandarlas.
         self._tSenyales[0].asignaTunel(self.trataSenyal)
-        self._tSenyales[0].habilitaTunel()        
+        self._tSenyales[0].habilitaTunel()
         
     @orm.reconstructor
     def init_on_load(self):
@@ -29,6 +36,7 @@ class Maestro (object):
         
     def setId(self, valor):
         self.id = valor
+        
     def getId(self):
         if self.id:
             return self.id
@@ -39,14 +47,20 @@ class Maestro (object):
         if valor != getattr(self, key):
             setattr(self, key, valor)
             self._camposModif.append(key)
+            self.trataSenyal([key], 'mv', valor)
                 
     def __getitem__ (self, key):
         return getattr(self, key)
 
-    def getTipoCampo(self, campo):    
-        print(campo, type(self.__class__.variante.property))
-        print ("******",campo," " , getattr(self, campo).c.type)    
-        return ''
+    def getTipoCampo(self, nombre_campo):
+        campo = getattr(self.__class__, nombre_campo)
+        if isinstance(campo.property, orm.relationships.RelationshipProperty):
+            if isinstance(self[nombre_campo], list):
+                return 'l'
+            else:
+                return 'e'
+        else:
+            return nombre_campo, type(campo.property.columns[0].type)
     
     def getCamposModif(self):
         return self._camposModif
@@ -82,8 +96,8 @@ class Maestro (object):
                     nf: nueva fila en los campos de líneas
                     bf: borra fila en los campos de líneas
                 *args - Diferentes argumentos opcionales y específicos de la señal en curso
-        '''      
-        self.log.info('[' + self.getAlmacen() + '] ' + str(self.getEtiqueta()) + '->trataSenyal: ' + str(fuente) + ', ' + str(senyal) + ', ' + str(args))
+        '''
+        logger.info('Maestro.trataSenyal: ' + str(self.__class__)  + str(self.etiqueta) + ' - ' + str(fuente) + ', ' + str(senyal) + ', ' + str(args))
         
         # Carga el campo a tratar
         fcampo = fuente[0]
@@ -91,36 +105,56 @@ class Maestro (object):
         # Si no es una tupla se dará por supuesto que la fila será la 0
         if not isinstance(fcampo, tuple):
             campotrat = fcampo
-            lineatrat = 0
         else:
-            campotrat = fcampo[0]
-            lineatrat = fcampo[1]
+            campotrat = fcampo[1]
                     
         # Tratamiento para las señales de los campos de la Unidad de Información
-        if (campotrat in self._camposConf.keys()):
-            # Ejecuta las funciones dependientes si las hubiera
-            if (senyal=='mv'):
-                if (self._camposConf[campotrat].parametro('dependientes')):
-                    self._procesaDependientes(lineatrat, campotrat)
-    
-            # Si es un campo el que emite la señal se añade a modificados
-            if not (campotrat in self._camposModif):
-                self._camposModif.append(campotrat)
-                self._camposVal.at[0, '_modif'] = True
+        '''
+        if (senyal=='mv'):
+            if (self._camposConf[campotrat].parametro('dependientes')):
+                self._procesaDependientes(lineatrat, campotrat)
+        '''
+        # Si es un campo el que emite la señal se añade a modificados
+        if not (campotrat in self._camposModif):
+            self._camposModif.append(campotrat)
                     
         # Pasa la señal al siguiente receptor si lo hubiera
         if self._tSenyales[1]:
-            self._tSenyales[1].emiteSenyal([self.getEtiqueta()]+fuente, senyal, *args)    
+            self._tSenyales[1].emiteSenyal([self.etiqueta]+fuente, senyal, *args)    
 
 class MaestroLineas (Maestro):
-    def nuevaLinea(self, campo):
-        lin = eval('self.__class__.'+campo+'.property.mapper.class_()')
-        if len(self[campo]):
-            pass
+    
+    def nuevaLinea(self, nombre_campo, orden=None):
+        lineas = self[nombre_campo]
+        lin = eval('self.__class__.'+nombre_campo+'.property.mapper.class_()')
+
+        # Calcula el campo id y asigna a la etiqueta el nombre del campo de líneas. 
+        lids = [l.getId() for l in lineas]
+        if lids:
+            lin['id'] = max(lids)+1
         else:
             lin['id'] = 1
-            lin['orden'] = 1
-        self[campo].append(lin)
+        lin.etiqueta = nombre_campo
+        
+        # Inserta la línea
+        if orden == None:
+            lineas.append(lin)
+            orden = lin.orden
+        else:
+            lineas.insert(orden, lin)
+
+        # Activa la señal de salida
+        self.trataSenyal([nombre_campo, (orden, None)], 'nf', orden)
+        
+        # Devuelve acceso directo a la nueva linea
+        return lin
+    
+    def borraLinea (self, nombre_campo, orden=-1):
+        lin = self[nombre_campo].pop(orden)
+        
+        # Activa la señal de salida
+        self.trataSenyal([nombre_campo, (orden, None)], 'bf', orden)    
+        
         return lin
 
 

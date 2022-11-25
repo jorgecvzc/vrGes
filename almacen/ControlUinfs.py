@@ -20,7 +20,7 @@ class ControlUinfs (object):
         
     def mnjMaestros(self):
         # Devuelve un Manejador de Maestros
-        session = sessionmaker(bind=self.bd)
+        session = sessionmaker(bind=self.bd, autoflush=False)
         return MnjMaestros(session())
 
     def mnjConsultas(self):

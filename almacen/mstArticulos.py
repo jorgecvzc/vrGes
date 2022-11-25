@@ -37,7 +37,7 @@ class Modificador (Maestro, Base):
     variante = relationship('Variante')
 
     def __str__(self):
-        return "<mst: Articulo.Modificador (Ref='%s', Nombre='%s', id_variante='%s')>" % (self.ref, self.nombre, str(self.varianteId))
+        return "<mst: Articulo.Modificador (Ref='%s', Nombre='%s', id_variante='%s')>" % (self.ref, self.nombre, self.varianteId)
         
 
 class Articulo (Maestro, Base):

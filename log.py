@@ -1,11 +1,12 @@
 import logging
 
-APP_LOGGER_NAME = 'VRGes'
+LOGGER_APP_NAME = 'VRGes'
+LOGGER_LEVEL = logging.DEBUG
 
-def ini_logger(logger_name = APP_LOGGER_NAME, file_name=None, level=0):
+def ini_logger(logger_name = LOGGER_APP_NAME, level=LOGGER_LEVEL, file_name=None):
     logger = logging.getLogger(logger_name)
-    logger.setLevel(logging.DEBUG)
-    #logger.setLevel(0)
+    #logger.setLevel(logging.DEBUG)
+    logger.setLevel(level)
     
     formatter = logging.Formatter('%(asctime)-5s %(name)-15s %(levelname)-8s %(message)s')
     
@@ -23,5 +24,5 @@ def ini_logger(logger_name = APP_LOGGER_NAME, file_name=None, level=0):
     return logger
 
 
-def get_logger(module_name):
-    return logging.getLogger(APP_LOGGER_NAME).getChild(module_name)
+def get_logger(module_name, logger_name=LOGGER_APP_NAME):
+    return logging.getLogger(logger_name).getChild(module_name)

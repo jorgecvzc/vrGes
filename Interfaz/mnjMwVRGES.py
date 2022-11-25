@@ -80,7 +80,8 @@ class MainWindow(QtWidgets.QMainWindow):
     def cerrarVentana(self):
         try:
             if self.mdiArea.activeSubWindow():
-                self.mdiArea.activeSubWindow().close()
+                if self.mdiArea.activeSubWindow().widget().guardarSiCambios():
+                    self.mdiArea.activeSubWindow().close()
             else:
                 self.close()
         except:

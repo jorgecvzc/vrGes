@@ -9,6 +9,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.schema import ForeignKey
 from sqlalchemy.orm import relationship
+from sqlalchemy.ext.orderinglist import ordering_list
 
 from .uInfs import Base, Maestro, MaestroLineas
 
@@ -34,7 +35,9 @@ class Proceso (MaestroLineas, Base):
     ref = Column('proRef', String(3))
     observaciones= Column('proObs', String(150), nullable=True)
     
-    tareas = relationship('ProcesoTarea')
+    tareas = relationship('ProcesoTarea', 
+                          order_by="ProcesoTarea.orden", collection_class=ordering_list('orden'),
+                          cascade="all, delete")
     
     def __str__ (self):
         return '<Proceso (Ref="%s", Nombre="%s")' % (self.ref, self.nombre)    
@@ -46,9 +49,9 @@ class ProcesoTarea (Maestro, Base):
     id = Column('protaId', SmallInteger, primary_key=True)
     orden = Column('protaOrden', SmallInteger)
     tareaId = Column('protaTarea', SmallInteger, ForeignKey('Tareas.tarId'))
-    tareaRef = Column('protaTareaRef', String(1))
-    observaiones = Column('protaObs', String(150), nullable=True)
-    unica = Column('protaUnica', Boolean, default=False)
+    tareaRef = Column('protaTareaRef', String(3))
+    observaciones = Column('protaObs', String(150), nullable=True)
+    unica = Column('protaUnica', Boolean, default=False, nullable=False)
 
     def __str__ (self):
         return '<Tarea de Proceso (Línea="%s", Tarea="%s")' % (self.orden, self.tareaRef)

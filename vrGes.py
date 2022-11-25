@@ -5,20 +5,22 @@ Created on 27 dic. 2018
 '''
 import sys
 import configparser
-
-from Utils import BDMantenimiento
+import pathlib
 
 from almacen import ControlUinfs
 from Interfaz.mnjMwVRGES import MainWindow, QtWidgets
 
+from Utils import BDMantenimiento
+
+import log
+log.ini_logger(log.LOGGER_APP_NAME, log.logging.DEBUG)
+log.ini_logger('vrGes.Sec', 0)
 
 class Gestion(object):
     
     def __init__(self, ruta):
         #import os, inspect
         #dirconf = os.path.dirname(inspect.getfile(inspect.currentframe()))
-        import pathlib
-
         dirconf = str(pathlib.Path(__file__).parent.absolute())
         
         # Ruta de la aplicación de donde se podrán extraer todas las configuraciones y accesos a elementos propios
@@ -33,7 +35,7 @@ class Gestion(object):
 
 
 def main():
-    g = Gestion('..')
+    g = Gestion('.')
 
     if 'generabd' in sys.argv:
         BDMantenimiento.CreaTablas(g.cUInf.bd)

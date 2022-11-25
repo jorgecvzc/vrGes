@@ -66,7 +66,8 @@ class ifProcesos(ifMaestro):
     TipoMaestro="Trabajos.Proceso"
     Interfaz = "wdProcesos.ui"
 
-    twLineasCols = {'refTarea':'Tarea','nomTarea':'Nombre', 'unica':'Tarea Única', 'observaciones':'Observaciones'}
+    #twLineasCols = {'tareaRef':'Tarea','tareaNombre':'Nombre', 'unica':'Tarea Única', 'observaciones':'Observaciones'}
+    twLineasCols = {'tareaRef':'Tarea','unica':'Tarea Única', 'observaciones':'Observaciones'}
     
     Campos = {
         'ref': ('ifCadena', 'leRef'),
