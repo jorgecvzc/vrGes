@@ -12,6 +12,19 @@ import pandas as pd
 
 from almacen.uInfs import Maestro, Consulta, ListaMaestro
 
+'''
+Función que devuelve un maestro partiendo de su módulo y nombre 
+'''
+def _maestro(nombre_maestro):
+    ruta = nombre_maestro.split('.')
+    if (len(ruta) == 3):
+        m = importlib.import_module('.mst'+ruta[1], ruta[0])
+        return getattr(m, ruta[2])
+    else:
+        m = importlib.import_module('.mst'+ruta[0], 'almacen')
+        return getattr(m, ruta[1])
+
+
 class MnjMaestros (object):
     '''
     Clase para el manejo de maestros y almacenamientos, independientemente de la topología de estos últimos.
@@ -23,17 +36,8 @@ class MnjMaestros (object):
         self.session.rollback()
         self.session.expunge_all()
     
-    def __maestro(self, nombre_maestro):
-        ruta = nombre_maestro.split('.')
-        if (len(ruta) == 3):
-            m = importlib.import_module('.mst'+ruta[1], ruta[0])
-            return getattr(m, ruta[2])
-        else:
-            m = importlib.import_module('.mst'+ruta[0], 'almacen')
-            return getattr(m, ruta[1])
-        
     def nuevoMaestro(self, tipo_maestro, **kwargs):
-        mst = self.__maestro(tipo_maestro)()
+        mst = _maestro(tipo_maestro)()
 
         if kwargs.pop('almacenar', True):
             self.session.add(mst)
@@ -81,7 +85,7 @@ class MnjMaestros (object):
         # En caso contrario será una tupla con la información
         elif 'tipo' in kwargs:
             tipo = kwargs['tipo']
-            tabla = self.__maestro(kwargs['tipo'])
+            tabla = _maestro(kwargs['tipo'])
             filtro = kwargs.pop('filtro', {'campos':{}})
             if filtro:
                 campos = [(getattr(tabla, campo), valor) for campo, valor in filtro['campos'].items()]
@@ -138,7 +142,7 @@ class MnjMaestros (object):
         # En caso contrario será una tupla con la información
         elif 'tipo' in kwargs:
             tipo = kwargs['tipo']
-            tabla = self.__maestro(tipo)
+            tabla = _maestro(tipo)
             filtro = kwargs.pop('filtro', [])
             campos = [(getattr(tabla, campo), valor) for campo, valor in filtro['campos'].items()]
         
@@ -181,7 +185,7 @@ class MnjMaestros (object):
             
         # En caso contrario será una tupla con la información
         elif 'tipo' in kwargs:
-            tabla = self.__maestro(kwargs['tipo'])
+            tabla = _maestro(kwargs['tipo'])
             filtro = kwargs.pop('filtro', {})
             campos = [(getattr(tabla, campo), valor) for campo, valor in filtro.items()]
         
@@ -225,7 +229,7 @@ class MnjConsultas (object):
         if not isinstance(maestros, list):
             maestros = [maestros]
 
-        maestros = [self.__maestro(m) for m in maestros]
+        maestros = [_maestro(m) for m in maestros]
         
         if not 'id' in campos_resultado:
             campos_resultado = ['id']+campos_resultado

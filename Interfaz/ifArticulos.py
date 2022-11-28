@@ -11,7 +11,7 @@ class ifArticulos(ifMaestro):
     Clase para el manejo de la interfaz de la clase Trabajos
     '''
     TipoMaestro="Articulos.Articulo"
-    Interfaz = "Articulos/wdArticulos.ui"
+    Interfaz = "Articulos/wdArticulos"
 
     ListasMst = {
         'lProveedores': ('Articulos.Proveedor', ['id', 'nombre'])
@@ -57,7 +57,7 @@ class ifVariantesArt(ifMaestro):
     Clase para el manejo de la interfaz de la clase ModificadoresArt
     '''
     TipoMaestro="Articulos.Variante"
-    Interfaz = "Articulos/wdVariantes.ui"
+    Interfaz = "Articulos/wdVariantes"
     
     Campos = {
         'leRef': ('ifCadena', 'ref'),
@@ -72,7 +72,7 @@ class ifModificadoresArt(ifMaestro):
     Clase para el manejo de la interfaz de la clase ModificadoresArt
     '''
     TipoMaestro = "Articulos.Modificador"
-    Interfaz = "Articulos/wdModificadores.ui"
+    Interfaz = "Articulos/wdModificadores"
  
     ListasMst = {
         'lVariantesArt': ('Articulos.Variante', ['nombre', 'ref'])

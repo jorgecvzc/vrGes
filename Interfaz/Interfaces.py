@@ -104,8 +104,6 @@ class ifDgMstBusqueda(QtWidgets.QDialog):
         return camposSel 
         
 
-        
-        
 '''
 CLASES DE UNION ENTRE INTERFAZ Y CAMPOS DE UN MAESTRO
 '''
@@ -194,12 +192,12 @@ class ifTexto(ifCampo):
         self.ifc.textChanged.connect(lambda: conMst.actualizaMaestro(campo, self))
 
     def getValor(self):
-        return self.qpe.toPlainText()
+        return self.ifc.toPlainText()
     
     def setValor(self, valor):
         if valor != self.getValor():
             if (valor) or (valor == ""):
-                self.qpe.appendPlainText(valor)
+                self.ifc.appendPlainText(valor)
             else:
                 self.limpia()
         
@@ -397,60 +395,59 @@ class ifTabla(object):
     Objetos de interfaz para el manejo de tablas
     '''
     def __init__(self, qtTableWidget, dict_cols, conMst, campo):
-        self.qtw = qtTableWidget
+        self.ifc = qtTableWidget
         self.campos = list(dict_cols.keys())
+
         # Los objetos complejos tienen que tener acceso al maestro ya que tienen señales internas de modificación
         self.conMst = conMst
         self.mstCampo = campo
         # Se crean las columnas de la tabla según la lista paada
-        self.qtw.setColumnCount(len(self.campos))
+        self.ifc.setColumnCount(len(self.campos))
         i = 0
         for s in self.campos:
-            self.qtw.setHorizontalHeaderItem(i, QtWidgets.QTableWidgetItem(dict_cols[s]))
+            self.ifc.setHorizontalHeaderItem(i, QtWidgets.QTableWidgetItem(dict_cols[s]))
             i+=1
 
         # Se acopla el menú contextual genérico de las tablas
-        self.qtw.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
-        self.qtw.customContextMenuRequested.connect(lambda pos: self.menuIfTabla(pos))       
+        self.ifc.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.ifc.customContextMenuRequested.connect(lambda pos: self.menuIfTabla(pos))       
         # Asigna los tratamientos especiales para teclas de control de movimiento
         #Qt5.QtWidgets.QShortcut(Qt5.QtCore.Qt.Key_Tab, self.cmpEditables[campo].qtw, activated=lambda: self.trataTab(campo))
-        
-        
+                
         # porc_col = .98/len(self.campos)
-        #self.qtw.setColumnWidth(i,self.qtw.width()*porc_col)
-        #self.qtw.setSizeAdjustPolicy(Qt5.QtWidgets.QAbstractScrollArea.AdjustToContents)
-        #self.qtw.resizeColumnsToContents()
-        cabecera = self.qtw.horizontalHeader() 
-        for i in range(self.qtw.columnCount()-1):
+        #self.ifc.setColumnWidth(i,self.ifc.width()*porc_col)
+        #self.ifc.setSizeAdjustPolicy(Qt5.QtWidgets.QAbstractScrollArea.AdjustToContents)
+        #self.ifc.resizeColumnsToContents()
+        cabecera = self.ifc.horizontalHeader() 
+        for i in range(self.ifc.columnCount()-1):
             cabecera.setSectionResizeMode(i, QtWidgets.QHeaderView.ResizeToContents)
         i += 1
         cabecera.setSectionResizeMode(i, QtWidgets.QHeaderView.Stretch)
         
-        self.qtw.itemChanged.connect(lambda: conMst.actualizaMaestro(campo, self))
-        
+        self.ifc.itemChanged.connect(lambda: conMst.actualizaMaestro(campo, self))
         
     def menuIfTabla(self, posicion):
         menu = QtWidgets.QMenu()
         insertAction = menu.addAction("Inserta Fila")
         borraAction = menu.addAction("Borra Fila")
         agregAction = menu.addAction("Agrega Fila")
-        action = menu.exec_(self.qtw.mapToGlobal(posicion))
+        action = menu.exec_(self.ifc.mapToGlobal(posicion))
         #self.senyalMaestro.deshabilitaSenyal(self.tipo_maestro, campo)
         if action == insertAction:
-            if self.qtw.currentRow() < 0:
+            if self.ifc.currentRow() < 0:
                 self.conMst.maestro.nuevaLinea(self.mstCampo)                
             else:
-                self.conMst.maestro.nuevaLinea(self.mstCampo, self.qtw.currentRow())                
+                self.conMst.maestro.nuevaLinea(self.mstCampo, self.ifc.currentRow())                
         elif action == borraAction:
-            if (self.qtw.currentRow() >= 0):
-                self.conMst.maestro.borraLinea(self.mstCampo, self.qtw.currentRow())
+            if (self.ifc.currentRow() >= 0):
+                self.conMst.maestro.borraLinea(self.mstCampo, self.ifc.currentRow())
         elif action == agregAction:
             self.conMst.maestro.nuevaLinea(self.mstCampo)
 
     def trataTab(self, campo):
         #event = Qt5.QtGui.QKeyEvent(Qt5.QtCore.QEvent.KeyPress, Qt5.QtCore.Qt.Key_Tab, Qt5.QtCore.Qt.NoModifier)
         #Qt5.QtCore.QCoreApplication.postEvent(self, event)
-        qtw = self.qtw
+        qtw = self.ifc
         lin = qtw.currentRow()
         col = qtw.currentColumn()
         if (col == qtw.columnCount()-1):
@@ -465,13 +462,13 @@ class ifTabla(object):
                                 
     def setColPropiedades(self, nombre_col, *args):
         i = self.campos.index(nombre_col)
-        self.qtw.setHorizontalHeaderItem(i, QtWidgets.QTableWidgetItem(args[0]))
+        self.ifc.setHorizontalHeaderItem(i, QtWidgets.QTableWidgetItem(args[0]))
         
     def nombreCol(self, pos):
         return self.campos[pos]
             
     def getValor(self, lin, col):
-        return self.qtw.cellWidget(lin, self.campos.index(col))
+        return self.ifc.cellWidget(lin, self.campos.index(col))
     
     def setValor(self, lin, col, valor):
         if isinstance(col, str):
@@ -479,50 +476,58 @@ class ifTabla(object):
         else:
             coln = col
             
-        self.qtw.blockSignals(True)
+        self.ifc.blockSignals(True)
         if isinstance(valor, bool):
-            chkBox = QtWidgets.QCheckBox(parent=self.qtw)
+            chkBox = QtWidgets.QCheckBox(parent=self.ifc)
             chkBox.setChecked(valor)
             chkBox.stateChanged.connect(self.trataPulsaBoton)
-            self.qtw.setCellWidget(lin, coln, chkBox)          
+            self.ifc.setCellWidget(lin, coln, chkBox)          
         else:
+            logger.warning('Alerta!, alerta!')     
+            '''    
             if valor:
-                self.qtw.setItem(lin, coln, QtWidgets.QTableWidgetItem(str(valor)))
+                self.ifc.setItem(lin, coln, QtWidgets.QTableWidgetItem(str(valor)))
             else:
-                self.qtw.setItem(lin, coln, QtWidgets.QTableWidgetItem(''))
-        self.qtw.blockSignals(False)
+                self.ifc.setItem(lin, coln, QtWidgets.QTableWidgetItem(''))
+            '''
+            q = QtWidgets.QLineEdit(parent=self.ifc)
+            q.setStyleSheet("border: 0px;")
+            q.setText('a')
+            self.ifc.setCellWidget(lin, coln, q)
+            
+        self.ifc.blockSignals(False)
     
     def trataPulsaBoton(self):
-        ch = self.qtw.sender()
+        ch = self.ifc.sender()
         print(ch.parent())
-        ix = self.qtw.indexAt(ch.pos())
+        ix = self.ifc.indexAt(ch.pos())
         self.conMst.maestro[self.mstCampo][ix.row()][self.nombreCol(ix.column())] = ch.isChecked()
         
     def agregaFila(self, valores, n_fila=None):
         if n_fila == None:
-            n_fila = self.qtw.rowCount()
-        self.qtw.insertRow(n_fila)
+            n_fila = self.ifc.rowCount()
+        self.ifc.insertRow(n_fila)
         if valores:
             i = 0
             for campo in self.campos:
                 self.setValor(n_fila, i, valores[campo])
                 i += 1
-        self.qtw.setCurrentCell(n_fila, 0)
+        self.ifc.setCurrentCell(n_fila, 0)
         
     def posActual(self):
-        return (self.qtw.currentRow(), self.qtw.currentColumn())
+        return (self.ifc.currentRow(), self.ifc.currentColumn())
     
     def valorActual(self):
         pos = self.posActual()
-        if type(self.qtw.cellWidget(pos[0], pos[1])) == QtWidgets.QCheckBox:
-            return self.qtw.cellWidget(pos[0], pos[1]).isChecked()
-            #return (self.qtw.item(pos[0],pos[1]).checkState() == 2)
+        if type(self.ifc.cellWidget(pos[0], pos[1])) == QtWidgets.QCheckBox:
+            return self.ifc.cellWidget(pos[0], pos[1]).isChecked()
+            #return (self.ifc.item(pos[0],pos[1]).checkState() == 2)
         else:
-            return self.qtw.item(pos[0],pos[1]).text()
+            return self.ifc.item(pos[0],pos[1]).text()
     
     def limpia(self):
-        for i in range(self.qtw.rowCount()-1,-1, -1):
-            self.qtw.removeRow(i)
+        for i in range(self.ifc.rowCount()-1,-1, -1):
+            self.ifc.removeRow(i)
 
 
 class ifConexionMst(object):
@@ -657,7 +662,7 @@ class ifMaestro(QtWidgets.QWidget):
         super().__init__(*args, **kwargs)
         
         # Carga la interfaz gráfica
-        uic.loadUi('Interfaz/Diseño/'+self.Interfaz, self)
+        uic.loadUi('Interfaz/Diseño/'+self.Interfaz+'.ui', self)
         
 
         for campoIf, campoConf in self.Campos.items():
@@ -832,23 +837,27 @@ class ifMaestro(QtWidgets.QWidget):
         
         try:
             # Se busca el primer campo de interfaz, si lo hay, que pueda tratar la senyal. Este campo deberá tratar todos los cambios que la senyal lleve implícitos                
-            iSigFuente = 1
+            iSigFuente = 0
             valor = args[0]
             ifCampos = self.cmpEditables
             for nomCampo in fuente[1:]:
                 ifCampos = ifCampos[nomCampo]
-            # tipoCampo = mstCampo.getTipoCampo(fuente[iSigFuente])
-            tipoCampo=''
-                    
+                iSigFuente += 1
+            tipoCampo = self.conMst.maestro.getTipoCampo(fuente[iSigFuente])
+                                            
             for ifCampo in ifCampos:
                 logger.info('ifMaestro.trataSenyal  - Campo: ' + str(ifCampo.ifc.objectName()))
                 if (tipoCampo == 'l'):
-                    if (iSigFuente == len(fuente)):
+                    logger.warning(iSigFuente)
+                    logger.warning(fuente)
+                    logger.warning(valor)
+                    if (iSigFuente+1 == len(fuente)):
                         ifCampo.limpia()
                         for fila in valor:
                             ifCampo.agregaFila(fila)
 
                     else:
+                        
                         (fila, campo) = fuente[iSigFuente]
                         if (senyal == 'mv'): # Se ha modificado un valor concreto
                             ifCampo.setValor(fila, campo, valor.getValor(fila, campo))
