@@ -59,9 +59,15 @@ class ifVariantesArt(ifMaestro):
     TipoMaestro="Articulos.Variante"
     Interfaz = "Articulos/wdVariantes"
     
+    linModificador = {
+        'Ref': ('ifCadena', 'ref'),
+        'Nombre': ('ifCadena', 'nombre'),
+    }
+    
     Campos = {
         'leRef': ('ifCadena', 'ref'),
-        'leNombre': ('ifCadena', 'nombre')
+        'leNombre': ('ifCadena', 'nombre'),
+        'twModificadores': ('ifTabla', linModificador, 'modificadores')
     }
 
     BusquedaMaestro = (['ref', 'nombre'], ['ref', 'nombre'])
@@ -81,7 +87,7 @@ class ifModificadoresArt(ifMaestro):
     Campos = {
         'leRef': ('ifCadena', 'ref'),
         'leNombre': ('ifCadena', 'nombre'),
-        'leVariante': ('ifCadenaExt', 'lVariantesArt', 'ref', 'variante'),
+        'leVariante': ('ifRefExt', 'lVariantesArt', 'ref', 'variante'),
         'cbVariante': ('ifListaExt', 'lVariantesArt', 'nombre', 'variante')
     }    
 

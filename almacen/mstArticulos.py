@@ -10,18 +10,19 @@ from sqlalchemy import (
 from sqlalchemy.schema import ForeignKey
 from sqlalchemy.orm import relationship
 
-from .uInfs import Base, Maestro
+from .uInfs import Base, Maestro, MaestroGrupo
 
 
 ''' Sección para los Artículos '''
 
-class Variante (Maestro, Base):
+class Variante (MaestroGrupo, Base):
     __tablename__ = 'VariantesArt'
     
     id = Column('varId', Integer, primary_key=True)
     ref = Column('varRef', String(6), nullable=False, info={'t':'t'})
     nombre = Column('varNombre', String(50), info={'t':'t'})
-
+    modificadores = relationship("Modificador", back_populates="variante")
+    
     def __str__(self):
         return "<mst: Articulo.Variante (Ref='%s', Nombre='%s')>" % (self.ref, self.nombre)
 
@@ -30,11 +31,12 @@ class Modificador (Maestro, Base):
     __tablename__ = 'ModificadoresArt'
     
     id = Column('moaId', Integer, primary_key=True)
+    orden = Column('moaOrden', SmallInteger)
     ref = Column('moaRef', String(6), nullable=False)
     nombre = Column('moaNombre', String(50))
     varianteId = Column('moaVariante', Integer, ForeignKey("VariantesArt.varId"))
     
-    variante = relationship('Variante')
+    variante = relationship("Variante", back_populates="modificadores")
 
     def __str__(self):
         return "<mst: Articulo.Modificador (Ref='%s', Nombre='%s', id_variante='%s')>" % (self.ref, self.nombre, self.varianteId)
@@ -136,9 +138,9 @@ class Pedido (Base):
     
     id = Column('pedId', Integer, primary_key=True)
     cliente = Column('pedCliente', Integer, ForeignKey("Clientes.cliId"), nullable=False, info={'t':'e', 'e':'Cliente'})
-    contacto = Column('pedContacto', String(75), info={'t':'t'})
-    telefono = Column('pedContTelefono', String(12), info={'t':'t'})
-    mail = Column('pedContMail', String(100), info={'t':'t'})
+    contacto = Column('pedContacto', String(75))
+    telefono = Column('pedContTelefono', String(12))
+    mail = Column('pedContMail', String(100))
     
     lineas = relationship("PedidoLineas", info={'t':'l'})
     

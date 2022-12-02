@@ -10,7 +10,7 @@ from sqlalchemy.orm import load_only
 
 import pandas as pd
 
-from almacen.uInfs import Maestro, Consulta, ListaMaestro
+from almacen.uInfs import Consulta, ListaMaestro
 
 '''
 Función que devuelve un maestro partiendo de su módulo y nombre 
@@ -50,9 +50,12 @@ class MnjMaestros (object):
             if not isinstance(msts, list):
                 msts = [msts]
             for mst in msts:
-                if mst in self.session:
+                if mst and mst in self.session:
                     self.session.expunge(mst)
-
+    
+    def vacia(self):
+        self.session.expunge_all()
+        
     def almacena(self):
         rst = self.session.commit()
         for mst in self.session:
@@ -84,7 +87,6 @@ class MnjMaestros (object):
 
         # En caso contrario será una tupla con la información
         elif 'tipo' in kwargs:
-            tipo = kwargs['tipo']
             tabla = _maestro(kwargs['tipo'])
             filtro = kwargs.pop('filtro', {'campos':{}})
             if filtro:

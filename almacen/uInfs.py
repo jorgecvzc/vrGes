@@ -139,12 +139,13 @@ class MaestroLineas (Maestro):
         # Inserta la línea
         if orden == None:
             lineas.append(lin)
-            orden = lin.orden
+            orden = len(lineas)-1
         else:
             lineas.insert(orden, lin)
-
+        lin.orden = orden
+        
         # Activa la señal de salida
-        self.trataSenyal([nombre_campo, (orden, None)], 'nf', orden)
+        self.trataSenyal([nombre_campo, orden], 'nf', orden)
         
         # Devuelve acceso directo a la nueva linea
         return lin
@@ -157,7 +158,36 @@ class MaestroLineas (Maestro):
         
         return lin
 
+class MaestroGrupo (Maestro):
+    
+    def nuevaLinea(self, nombre_campo, orden=None):
+        lineas = self[nombre_campo]
+        lin = eval('self.__class__.'+nombre_campo+'.property.mapper.class_()')
 
+        lin.etiqueta = nombre_campo
+        
+        # Inserta la línea
+        if orden == None:
+            lineas.append(lin)
+            orden = len(lineas)-1
+        else:
+            lineas.insert(orden, lin)
+        lin.orden = orden
+        
+        # Activa la señal de salida
+        self.trataSenyal([nombre_campo, orden], 'nf', orden)
+        
+        # Devuelve acceso directo a la nueva linea
+        return lin
+    
+    def borraLinea (self, nombre_campo, orden=-1):
+        lin = self[nombre_campo].pop(orden)
+        
+        # Activa la señal de salida
+        self.trataSenyal([nombre_campo, (orden, None)], 'bf', orden)    
+        
+        return lin
+    
 class ListaMaestro (list):
     def col(self, col):
         return [c[col] for c in self]

@@ -69,13 +69,13 @@ class ifProcesos(ifMaestro):
     Interfaz = "wdProcesos"
 
     #twLineasCols = {'tareaRef':'Tarea','tareaNombre':'Nombre', 'unica':'Tarea Única', 'observaciones':'Observaciones'}
-    twLineasCols = {'tareaRef':'Tarea','unica':'Tarea Única', 'observaciones':'Observaciones'}
+    linTarea = {'tareaRef':'Tarea','unica':'Tarea Única', 'observaciones':'Observaciones'}
     
     Campos = {
         'leRef': ('ifCadena', 'ref'),
         'leNombre': ('ifCadena', 'nombre'),
         'ptObs': ('ifTexto', 'observaciones'),
-        'twTareas': ('ifTabla', twLineasCols, 'tareas')
+        'twTareas': ('ifTabla', linTarea, 'tareas')
     }
     
     BusquedaMaestro = (['ref', 'nombre'], ['ref', 'nombre'])    
