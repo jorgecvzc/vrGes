@@ -145,7 +145,7 @@ class MaestroLineas (Maestro):
         lin.orden = orden
         
         # Activa la señal de salida
-        self.trataSenyal([nombre_campo, orden], 'nf', orden)
+        self.trataSenyal([nombre_campo, orden], 'nf')
         
         # Devuelve acceso directo a la nueva linea
         return lin
@@ -154,7 +154,7 @@ class MaestroLineas (Maestro):
         lin = self[nombre_campo].pop(orden)
         
         # Activa la señal de salida
-        self.trataSenyal([nombre_campo, (orden, None)], 'bf', orden)    
+        self.trataSenyal([nombre_campo, orden], 'bf')    
         
         return lin
 
@@ -175,7 +175,7 @@ class MaestroGrupo (Maestro):
         lin.orden = orden
         
         # Activa la señal de salida
-        self.trataSenyal([nombre_campo, orden], 'nf', orden)
+        self.trataSenyal([nombre_campo, orden], 'nf')
         
         # Devuelve acceso directo a la nueva linea
         return lin
@@ -184,7 +184,7 @@ class MaestroGrupo (Maestro):
         lin = self[nombre_campo].pop(orden)
         
         # Activa la señal de salida
-        self.trataSenyal([nombre_campo, (orden, None)], 'bf', orden)    
+        self.trataSenyal([nombre_campo, orden], 'bf')
         
         return lin
     

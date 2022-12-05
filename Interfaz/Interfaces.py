@@ -10,10 +10,11 @@ from PyQt5 import uic, QtWidgets, QtCore
 from PyQt5.QtGui import QKeySequence
 from PyQt5.QtWidgets import QMessageBox, QShortcut, QCompleter
 
+from .ifCampos import ifTabla
+
 from Señales import TunelSenyal
 
 import log
-from PyQt5.Qt import QTableWidget, QLineEdit
 logger = log.get_logger(__name__)
 
 '''
@@ -156,7 +157,6 @@ class ifMaestro(QtWidgets.QWidget):
                 self.cmpEditables[campoMst] = [ifCampo]
             else:
                 self.cmpEditables[campoMst].append(ifCampo)
-        self.leRef.inicializa()
         
         # Asigna atajos de teclado y comandos correspondientes
         self.shortcut_open = QShortcut(QKeySequence('Ctrl+R'), self)
@@ -164,22 +164,21 @@ class ifMaestro(QtWidgets.QWidget):
         self.keyPressed.connect(self.on_key)
         
         self.nuevo()
-               
+
     def keyPressEvent(self, event):
         super(ifMaestro, self).keyPressEvent(event)
         self.keyPressed.emit(event.key())
-        
+         
     def on_key(self, key):
         '''
         Remite la tecla al ifCampo actual para que la procese
         '''
         if self.focusWidget():
             pfw = self.focusWidget().parent().parent()
-            print(pfw)
-            if isinstance(pfw, QTableWidget):
-                if (pfw.currentRow() == pfw.rowCount()-1):
-                    if (pfw.currentColumn() == pfw.columnCount()-1):
-                        pfw.insertRow(pfw.rowCount())
+            print(self.focusWidget().parent())
+            if isinstance(pfw, ifTabla):
+                if pfw.posUltima():
+                    pfw.conMst().nuevaLinea(pfw.mstCampo)
             self.focusNextPrevChild(True)
             #self.focusWidget().ifCampo.procesaTeclas(key)
     
@@ -204,11 +203,10 @@ class ifMaestro(QtWidgets.QWidget):
     def agregaIfCampo(self, campo, param):
         # Se cargan los ifCampos y sus desencadenadores al actualizarlos
         qtCamp = getattr(self, campo)
-        tipoIf= param[0]
         campoMst = param[-1]
         
-        cmpEditable = nuevoIfCampo(self, tipoIf, self.conMst, campoMst, campo_qt=qtCamp, param=param[1:-1])
-        return cmpEditable
+        qtCamp.inicializa(self.conMst, campoMst, param[1:-1])
+        return qtCamp
        
     def vaciaIfCampos(self, dic=None):
         if not dic:

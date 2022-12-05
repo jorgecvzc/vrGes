@@ -90,7 +90,7 @@
      </widget>
     </item>
     <item row="2" column="1">
-     <widget class="QLineEdit" name="leNombre">
+     <widget class="ifCadena" name="leNombre">
       <property name="font">
        <font>
         <pointsize>12</pointsize>
@@ -99,7 +99,7 @@
      </widget>
     </item>
     <item row="1" column="1">
-     <widget class="QLineEdit" name="leRef">
+     <widget class="ifCadena" name="leRef">
       <property name="maximumSize">
        <size>
         <width>663</width>
@@ -119,7 +119,7 @@
        <enum>QLayout::SetDefaultConstraint</enum>
       </property>
       <item>
-       <widget class="QLineEdit" name="leVariante">
+       <widget class="ifRefExt" name="leVariante">
         <property name="maximumSize">
          <size>
           <width>100</width>
@@ -134,7 +134,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QComboBox" name="cbVariante">
+       <widget class="ifListaExt" name="cbVariante">
         <property name="minimumSize">
          <size>
           <width>0</width>
@@ -158,6 +158,23 @@
    <zorder>label_4</zorder>
   </widget>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>ifRefExt</class>
+   <extends>QLineEdit</extends>
+   <header>Interfaz/ifCampos.h</header>
+  </customwidget>
+  <customwidget>
+   <class>ifCadena</class>
+   <extends>QLineEdit</extends>
+   <header>Interfaz/ifCampos.h</header>
+  </customwidget>
+  <customwidget>
+   <class>ifListaExt</class>
+   <extends>QComboBox</extends>
+   <header>Interfaz/ifCampos.h</header>
+  </customwidget>
+ </customwidgets>
  <tabstops>
   <tabstop>leVariante</tabstop>
   <tabstop>cbVariante</tabstop>
