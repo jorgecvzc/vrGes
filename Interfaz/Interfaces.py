@@ -157,7 +157,7 @@ class ifMaestro(QtWidgets.QWidget):
                 self.cmpEditables[campoMst] = [ifCampo]
             else:
                 self.cmpEditables[campoMst].append(ifCampo)
-        
+         # campo_lista
         # Asigna atajos de teclado y comandos correspondientes
         self.shortcut_open = QShortcut(QKeySequence('Ctrl+R'), self)
         self.shortcut_open.activated.connect(lambda: self.procesaAtajo('BC')) 
@@ -178,7 +178,7 @@ class ifMaestro(QtWidgets.QWidget):
             print(self.focusWidget().parent())
             if isinstance(pfw, ifTabla):
                 if pfw.posUltima():
-                    pfw.conMst().nuevaLinea(pfw.mstCampo)
+                    pfw.conMst().nuevaLinea(pfw.campoMst)
             self.focusNextPrevChild(True)
             #self.focusWidget().ifCampo.procesaTeclas(key)
     
@@ -204,8 +204,7 @@ class ifMaestro(QtWidgets.QWidget):
         # Se cargan los ifCampos y sus desencadenadores al actualizarlos
         qtCamp = getattr(self, campo)
         campoMst = param[-1]
-        
-        qtCamp.inicializa(self.conMst, campoMst, param[1:-1])
+        qtCamp.inicializa(self.conMst, campoMst, *param[1:-1], self.valListas)
         return qtCamp
        
     def vaciaIfCampos(self, dic=None):
@@ -247,7 +246,6 @@ class ifMaestro(QtWidgets.QWidget):
     def primeraAccion (self):
         # Carga el primer maestro en la interfaz
         self.cargaMaestro('pri')
-            
                 
     # Fucniones de navegación sobre los maestros almacenados
     def cargaMaestro(self, mov):
@@ -272,9 +270,8 @@ class ifMaestro(QtWidgets.QWidget):
             self.maestro = self.mnj.nuevoMaestro(self.TipoMaestro, etiqueta=self.TipoMaestro)
             # Habilita el tunel entre el Maestro y la Interfaz del maestro
             self.maestro.asignaTunelSenyal(self.senyalMaestro)
-            self.senyalMaestro.habilitaTunel()              
+            self.senyalMaestro.habilitaTunel()        
 
-                
     def almacena(self):
         return self.mnj.almacena()
 

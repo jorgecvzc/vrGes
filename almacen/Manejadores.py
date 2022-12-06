@@ -74,6 +74,7 @@ class MnjMaestros (object):
         mov = kwargs.pop('mov', 'ig')
 
         # Si el filtro es una uInf se busca según sus campos modificados
+        ref = None
         if 'mst_ref' in kwargs:
             ref = kwargs['mst_ref']
             tabla = ref.__class__
@@ -114,15 +115,16 @@ class MnjMaestros (object):
             stmt = stmt.filter(filtro).order_by(tabla.id.asc()).limit(1)
 
         # Devuelve el resultado
-        self.session.rollback()
         result = self.session.scalars(stmt).first()
         if result:
+            if ref:
+                self.session.expunge(ref)            
             return result
         else:
             return None
 
     def buscaMaestro(self, **kwargs):
-        # Busca el primer maestrodel almacén que cumpla las opciones:
+        # Busca el primer maestro del almacén que cumpla las opciones:
         #  mst_ref: Usará un maestro para la carga.
         #  tipo: Usará un nombre para la carga. Si no hay mov devolverá el primero existente.
         #  mov: Movimiento dentro de pri', 'ult'
@@ -132,6 +134,7 @@ class MnjMaestros (object):
         mov = kwargs.pop('mov', 'pri')
 
         # Si el filtro es una Unidad de Información se busca según sus campos modificados
+        ref = None
         if 'mst_ref' in kwargs:
             ref = kwargs['mst_ref]']
             tabla = ref.__class__
@@ -139,7 +142,6 @@ class MnjMaestros (object):
             # Si no se recuperarán los campos modificados, si los hubiera,  como campos de búsqueda. 
             if ref._camposModif:
                 campos = [(getattr(tabla, campo), ref[campo]) for campo in ref._camposModif]
-            self.session.expunge(ref)
 
         # En caso contrario será una tupla con la información
         elif 'tipo' in kwargs:
@@ -161,9 +163,11 @@ class MnjMaestros (object):
         else:
             stmt = stmt.filter(filtro).order_by(tabla.id.asc()).limit(1)
 
-        # Devuelve el resultado        
+        # Devuelve el resultado
         result = self.session.scalars(stmt).first()
         if result:
+            if ref:
+                self.session.expunge(ref)            
             return result[0]
         else:
             return None
