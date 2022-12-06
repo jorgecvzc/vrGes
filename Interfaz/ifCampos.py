@@ -39,7 +39,7 @@ class ifCadena(QLineEdit, ifCampo):
         self.conMst = None
         self.campoMst = None
                 
-        self.editingFinished.connect(lambda: self.conMst().__setitem__(self.campo, self.getValor())) 
+        self.editingFinished.connect(lambda: self.conMst().__setitem__(self.campoMst, self.getValor())) 
  
     def inicializa(self, conMst, campoMst, params):
         self.conMst = conMst
@@ -307,6 +307,7 @@ class ifTabla(ifCampo, QTableWidget):
         
         
     def menuIfTabla(self, posicion):
+        print('Click - ', posicion)
         menu = QtWidgets.QMenu()
         insertAction = menu.addAction("Inserta Fila")
         borraAction = menu.addAction("Borra Fila")
