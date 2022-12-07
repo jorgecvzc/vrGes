@@ -157,7 +157,7 @@ class ifMaestro(QtWidgets.QWidget):
                 self.cmpEditables[campoMst] = [ifCampo]
             else:
                 self.cmpEditables[campoMst].append(ifCampo)
-         # campo_lista
+        # campo_lista
         # Asigna atajos de teclado y comandos correspondientes
         self.shortcut_open = QShortcut(QKeySequence('Ctrl+R'), self)
         self.shortcut_open.activated.connect(lambda: self.procesaAtajo('BC')) 
@@ -250,10 +250,12 @@ class ifMaestro(QtWidgets.QWidget):
     # Fucniones de navegación sobre los maestros almacenados
     def cargaMaestro(self, mov):
         if self.guardarSiCambios():
-            mst = self.mnj.cargaMaestro(mst_ref=self.maestro, mov=mov) 
+            idm = self.maestro.getId()
+            self.mnj.descarta()
+
+            mst = self.mnj.cargaMaestro(tipo=self.TipoMaestro, filtro={'campos': {'id': idm}}, mov=mov) 
             if mst:
                 if mst != self.maestro:
-                    self.mnj.descarta(self.maestro)
                     self.maestro = mst
                     self.maestro.vaciaCamposModif()
                     self.maestro.asignaTunelSenyal(self.senyalMaestro)
@@ -266,7 +268,7 @@ class ifMaestro(QtWidgets.QWidget):
     def nuevo(self):
         if self.guardarSiCambios():
             self.vaciaIfCampos()
-            self.mnj.descarta(self.maestro)        
+            self.mnj.descarta()        
             self.maestro = self.mnj.nuevoMaestro(self.TipoMaestro, etiqueta=self.TipoMaestro)
             # Habilita el tunel entre el Maestro y la Interfaz del maestro
             self.maestro.asignaTunelSenyal(self.senyalMaestro)

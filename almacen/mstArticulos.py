@@ -21,7 +21,7 @@ class Variante (MaestroGrupo, Base):
     id = Column('varId', Integer, primary_key=True)
     ref = Column('varRef', String(6), nullable=False, info={'t':'t'})
     nombre = Column('varNombre', String(50), info={'t':'t'})
-    modificadores = relationship("Modificador", back_populates="variante")
+    modificadores = relationship("Modificador", back_populates="variante", order_by="Modificador.orden")
     
     def __str__(self):
         return "<mst: Articulo.Variante (Ref='%s', Nombre='%s')>" % (self.ref, self.nombre)
@@ -39,7 +39,7 @@ class Modificador (Maestro, Base):
     variante = relationship("Variante", back_populates="modificadores")
 
     def __str__(self):
-        return "<mst: Articulo.Modificador (Ref='%s', Nombre='%s', id_variante='%s')>" % (self.ref, self.nombre, self.varianteId)
+        return "<mst: Articulo.Modificador (Id=%s, Ref='%s', Nombre='%s', id_variante='%s', orden=%s)>" % (self.id, self.ref, self.nombre, self.varianteId, self.orden)
         
 
 class Articulo (Maestro, Base):

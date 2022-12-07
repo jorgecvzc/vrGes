@@ -137,12 +137,15 @@ class MaestroLineas (Maestro):
         lin.etiqueta = nombre_campo
         
         # Inserta la línea
-        if orden == None:
-            lineas.append(lin)
-            orden = len(lineas)-1
-        else:
-            lineas.insert(orden, lin)
+        if (orden == None) or (orden < 0):
+            #lineas.append(lin)
+            orden = len(lineas)
+        if orden < len(lineas):
+            for l in lineas:
+                if l.orden >= orden:
+                    l.orden += 1
         lin.orden = orden
+        lineas.insert(orden, lin)      
         
         # Activa la señal de salida
         self.trataSenyal([nombre_campo, orden], 'nf')
@@ -151,11 +154,15 @@ class MaestroLineas (Maestro):
         return lin
     
     def borraLinea (self, nombre_campo, orden=-1):
-        lin = self[nombre_campo].pop(orden)
-        
+        lineas = self[nombre_campo]
+        if orden < len(lineas):
+            for l in lineas:
+                if l.orden > orden:
+                    l.orden -= 1
+        lin = lineas.pop(orden)
+                
         # Activa la señal de salida
         self.trataSenyal([nombre_campo, orden], 'bf')    
-        
         return lin
 
 class MaestroGrupo (Maestro):
@@ -167,13 +174,16 @@ class MaestroGrupo (Maestro):
         lin.etiqueta = nombre_campo
         
         # Inserta la línea
-        if orden == None:
-            lineas.append(lin)
-            orden = len(lineas)-1
-        else:
-            lineas.insert(orden, lin)
+        if (orden == None) or (orden < 0):
+            #lineas.append(lin)
+            orden = len(lineas)
+        if orden < len(lineas):
+            for l in lineas:
+                if l.orden >= orden:
+                    l.orden += 1
         lin.orden = orden
-        
+        lineas.insert(orden, lin)                    
+                
         # Activa la señal de salida
         self.trataSenyal([nombre_campo, orden], 'nf')
         
@@ -181,11 +191,15 @@ class MaestroGrupo (Maestro):
         return lin
     
     def borraLinea (self, nombre_campo, orden=-1):
-        lin = self[nombre_campo].pop(orden)
-        
+        lineas = self[nombre_campo]
+        if orden < len(lineas):
+            for l in lineas:
+                if l.orden > orden:
+                    l.orden -= 1
+        lin = lineas.pop(orden)
+                
         # Activa la señal de salida
         self.trataSenyal([nombre_campo, orden], 'bf')
-        
         return lin
     
 class ListaMaestro (list):

@@ -91,11 +91,12 @@ class MnjMaestros (object):
             tabla = _maestro(kwargs['tipo'])
             filtro = kwargs.pop('filtro', {'campos':{}})
             if filtro:
-                campos = [(getattr(tabla, campo), valor) for campo, valor in filtro['campos'].items()]
+                campos = [(getattr(tabla, campo), valor) for campo, valor in filtro['campos'].items() if valor != None]
         
         else:
             raise NameError ('MnjMaestro->cargaMaestro: Debe haber un "mst_ref" o "tipo"')
-
+        
+        print(tabla)
         # Carga el objeto que mapea la tabla de almacén
         stmt = select(tabla)
 
@@ -117,8 +118,6 @@ class MnjMaestros (object):
         # Devuelve el resultado
         result = self.session.scalars(stmt).first()
         if result:
-            if ref:
-                self.session.expunge(ref)            
             return result
         else:
             return None

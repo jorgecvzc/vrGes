@@ -421,7 +421,7 @@ class ifTabla(ifCampo, QTableWidget):
             return self.item(pos[0],pos[1]).text()
     
     def limpia(self):
-        for i in range(self.rowCount()-1,-1, -1):
+        for i in range(self.rowCount()-1, -1, -1):
             self.removeRow(i)
 
     def trataSenyal(self, fuente, senyal, *args):
