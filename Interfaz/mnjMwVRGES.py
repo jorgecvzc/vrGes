@@ -61,6 +61,8 @@ class MainWindow(QtWidgets.QMainWindow):
         
         self.actLogImp.triggered.connect(lambda: self.acMaestro('i'))
         
+        self.abrirVentana('Procesos')
+
     def abrirVentana(self, if_nombre):
         try:    
             ui = self.uis.get(if_nombre, lambda: None)()

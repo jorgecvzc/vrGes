@@ -24,10 +24,9 @@ def _maestro(nombre_maestro):
         m = importlib.import_module('.mst'+ruta[0], 'almacen')
         return getattr(m, ruta[1])
 
-
-class MnjMaestros (object):
+class Mnj (object):
     '''
-    Clase para el manejo de maestros y almacenamientos, independientemente de la topología de estos últimos.
+    Clase madre de los manejadores
     '''
     def __init__(self, session, **kwargs):
         self.session = session
@@ -35,7 +34,12 @@ class MnjMaestros (object):
     def __del__(self):
         self.session.rollback()
         self.session.expunge_all()
-    
+
+
+class MnjMaestros (Mnj):
+    '''
+    Clase para el manejo de maestros y almacenamientos, independientemente de la topología de estos últimos.
+    '''
     def nuevoMaestro(self, tipo_maestro, **kwargs):
         mst = _maestro(tipo_maestro)()
 
@@ -43,25 +47,6 @@ class MnjMaestros (object):
             self.session.add(mst)
         return mst
 
-    def descarta (self, msts=None):
-        if not msts:
-            self.session.expunge_all()
-        else:
-            if not isinstance(msts, list):
-                msts = [msts]
-            for mst in msts:
-                if mst and mst in self.session:
-                    self.session.expunge(mst)
-    
-    def vacia(self):
-        self.session.expunge_all()
-        
-    def almacena(self):
-        rst = self.session.commit()
-        for mst in self.session:
-            mst._camposModif = []
-        return rst
-    
     def cargaMaestro(self, **kwargs):
         # Carga un maestro del almacén según las opciones:
         #  mst_ref: Usará un maestro para la carga.
@@ -116,6 +101,7 @@ class MnjMaestros (object):
             stmt = stmt.filter(filtro).order_by(tabla.id.asc()).limit(1)
 
         # Devuelve el resultado
+        self.session.expunge_all()
         result = self.session.scalars(stmt).first()
         if result:
             return result
@@ -170,7 +156,27 @@ class MnjMaestros (object):
             return result[0]
         else:
             return None
+
+    def almacena(self):
+        rst = self.session.commit()
+        for mst in self.session:
+            mst._camposModif = []
+        return rst
         
+    def descarta (self, mst=None):
+        if not mst:
+            self.vacia()
+        elif mst in self.session:
+            self.session.expunge(mst)
+
+    def vacia(self):
+        self.session.expunge_all()
+
+
+class MnjListas (Mnj):
+    '''
+    Carga listas de consulta
+    '''
     def cargaLista(self, **kwargs):
         # Carga y devuelve una lista de maestros dependiendo de las opcioens:
         #  mst_ref:  Se cargará la lista en referencia a un maestro
@@ -215,14 +221,16 @@ class MnjMaestros (object):
         else:
             return None
 
-    def borraMaestro(self, msts):
-        if not isinstance(msts, list):
-            msts = [msts]
-        for mst in msts:
-            if mst in self.session:
-                self.session.delete(mst)
+    def borraLineas(self, lsts):
+        for lst in lsts:
+            if lst in self.session:
+                self.session.delete(lst)
         return self.session.commit()
-        
+
+    def vacia(self):
+        self.session.expunge_all()
+
+
 class MnjConsultas (object):
     def __init__(self, conn):
         self.con = conn

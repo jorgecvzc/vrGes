@@ -58,7 +58,7 @@
      </widget>
     </item>
     <item row="0" column="1">
-     <widget class="QLineEdit" name="leRef">
+     <widget class="ifCadena" name="leRef">
       <property name="maximumSize">
        <size>
         <width>663</width>
@@ -105,7 +105,7 @@
      </widget>
     </item>
     <item row="1" column="1">
-     <widget class="QLineEdit" name="leNombre">
+     <widget class="ifCadena" name="leNombre">
       <property name="font">
        <font>
         <pointsize>12</pointsize>
@@ -114,7 +114,7 @@
      </widget>
     </item>
     <item row="2" column="1">
-     <widget class="QLineEdit" name="leDescripcion">
+     <widget class="ifCadena" name="leDescripcion">
       <property name="font">
        <font>
         <pointsize>12</pointsize>
@@ -131,6 +131,13 @@
    <zorder>label_3</zorder>
   </widget>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>ifCadena</class>
+   <extends>QLineEdit</extends>
+   <header>Interfaz/ifCampos.h</header>
+  </customwidget>
+ </customwidgets>
  <tabstops>
   <tabstop>leRef</tabstop>
   <tabstop>leNombre</tabstop>

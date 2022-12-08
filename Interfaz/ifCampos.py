@@ -1,7 +1,12 @@
 from sqlalchemy.orm import object_session
 
 from PyQt5 import QtCore, QtWidgets
-from PyQt5.Qt import QTableWidget, QLineEdit, QComboBox
+from PyQt5.Qt import (
+    QTableWidget, 
+    QLineEdit, 
+    QComboBox, 
+    QPlainTextEdit, 
+    QCheckBox)
 from PyQt5.QtWidgets import QCompleter
 
 import log
@@ -36,14 +41,11 @@ class ifCadena(QLineEdit, ifCampo):
     '''
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.conMst = None
-        self.campoMst = None
-                
-        self.editingFinished.connect(lambda: self.conMst().__setitem__(self.campoMst, self.getValor())) 
  
     def inicializa(self, conMst, campoMst, *args):
         self.conMst = conMst
         self.campoMst = campoMst  
+        self.editingFinished.connect(lambda: self.conMst().__setitem__(self.campoMst, self.getValor())) 
            
     def getValor(self):
         return self.text()
@@ -71,26 +73,22 @@ class ifRefExt(QLineEdit, ifCampo):
     '''
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.conMst = None          
-        self.campoMst = None
         self.lista = None        
         self.lRef = None
-     
-        self.editingFinished.connect(lambda: self.conMst().__setitem__(self.campoMst, self.getValor())) 
-            
+           
     def inicializa(self, con_mst, campo,*args):
         self.campoMst = campo
-
         self.lista = args[-1][args[-3]] # lista_mst
         self.campoLista = args[-2]
         
         self.lRef = [str(l[self.campoLista]) for l in self.lista]
-        print(self.lRef)
         qCompleter = QCompleter(self.lRef)
         self.setCompleter(qCompleter)
-        print('aquí')
-        # self.ifc.__dict__['ifCampo'] = self # Los campos qt apuntarán al campo de interfaz que los engloba para poder procesar eventos como los del teclado
+
         self.conMst = con_mst        
+
+        self.editingFinished.connect(
+            lambda: self.conMst().__setitem__(self.campoMst, self.getValor())) 
 
     def getValor(self):
         valor = self.text()
@@ -116,14 +114,18 @@ class ifRefExt(QLineEdit, ifCampo):
         else:
             print('key pressed: %s' % key)
             
-class ifTexto(ifCampo):
+class ifTexto(ifCampo, QPlainTextEdit):
     '''
     Objetos de interfaz para mostrar una cadena
     '''
-    def __init__(self, qt_ptext_edit, conMst, campo):
-        super().__init__(qt_ptext_edit, campo)        
-
-        self.textChanged.connect(lambda: conMst().__setitem__(campo, self.getValor()))
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+ 
+    def inicializa(self, conMst, campoMst, *args):
+        self.conMst = conMst
+        self.campoMst = campoMst  
+        self.textChanged.connect(
+            lambda: conMst().__setitem__(self.campoMst, self.getValor()))
 
     def getValor(self):
         return self.toPlainText()
@@ -141,35 +143,44 @@ class ifTexto(ifCampo):
         self.blockSignals(False)        
     
     
-class ifVerificacion(ifCampo):
+class ifVerificacion(ifCampo, QCheckBox):
     '''
     Objetos de interfaz para mostrar una cadena
     '''
-    def __init__(self, qt_checkbox, qts_habilitados, conMst, campo):
-        super().__init__(qt_checkbox, campo)
-        self.qtsHabil = qts_habilitados
-        self.stateChanged.connect(lambda: self.actualizaValidador(conMst(), campo))
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+ 
+    def inicializa(self, conMst, campoMst, *params):
+        self.conMst = conMst
+        self.campoMst = campoMst
+        self.qtsHabil = params[-2]  # Campos dependientes de verificacion
+
+        self.stateChanged.connect(
+            lambda: self.actualizaValidador())
+
+    def actualizaValidador(self):
+        self.conMst().__setitem__(self.campoMst, self.getValor())
+        self.habilitaCampos()
 
     def getValor(self):
-        return self.chb.isChecked()
+        return self.isChecked()
     
     def setValor(self, valor):
         if valor != self.getValor():
-            self.blockSignals(True)        
-            self.setChecked(valor)
-            self.validaCampos()
+            self.blockSignals(True)
+            if valor:
+                self.setChecked(valor)
+            else:
+                self.setChecked(False)
+            self.habilitaCampos()
             self.blockSignals(False)        
         
     def limpia(self):
-        self.chb.blockSignals(True)        
-        self.chb.setChecked(False)
-        self.chb.blockSignals(False)              
-
-    def actualizaValidador(self, conMst, campo):
-        conMst()[campo] = self.getValor()
-        self.validaCampos()
+        self.blockSignals(True)        
+        self.setChecked(False)
+        self.blockSignals(False)              
         
-    def validaCampos(self):
+    def habilitaCampos(self):
         if self.qtsHabil:
             for elem in self.qtsHabil:
                 elem.setEnabled(self.getValor())
@@ -269,11 +280,11 @@ class ifTabla(ifCampo, QTableWidget):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.confCampos = None
-        self.conMst = None
-        self.campoMst = None
+        self.valListas = None
         
     def inicializa(self, con_mst, campo_mst, *args):
         self.confCampos = args[0]
+        self.valListas = args[-1]
         self.conMst = con_mst
 
         # Los objetos complejos tienen que tener acceso al maestro ya que tienen señales internas de modificación
@@ -398,8 +409,11 @@ class ifTabla(ifCampo, QTableWidget):
             tipoIf= confCampo[0]
             campoMst= confCampo[-1]
 
-            cmpEditable = nuevoIfCampo(self, tipoIf, self.conMstLinea, campoMst, param=confCampo[1:-1])
+            cmpEditable = nuevoIfCampo(
+                self, tipoIf, self.conMstLinea, campoMst, 
+                *confCampo[1:-1], self.valListas)
             cmpEditable.setValor(valores[campoMst])
+
             self.setCellWidget(n_fila, i, cmpEditable)
             self.setStyleSheet("border : 0px;")
             i += 1               
@@ -426,7 +440,7 @@ class ifTabla(ifCampo, QTableWidget):
 
     def trataSenyal(self, fuente, senyal, *args):
         # Tratará las señales procedentes del maestro principal
-        logger.info('ifMaestro.trataSenyal ' + str(fuente) + ' - ' + senyal + ' - ' + str(args))
+        logger.info('ifTabla.trataSenyal ' + str(fuente) + ' - ' + senyal + ' - ' + str(args))
 
         # Se pasa la señal a todos los ifCampos unidos al campo maestro si los hay
         if (len(fuente)-1):
@@ -445,16 +459,14 @@ class ifTabla(ifCampo, QTableWidget):
                 self.agregaFila(l, l.orden)
                 
 
-def nuevoIfCampo(if_widget, tipoIf, conMst, campoMst, **kwargs):
+def nuevoIfCampo(if_widget, tipoIf, conMst, campoMst, *args):
     # Se cargan los ifCampos y sus desencadenadores al actualizarlos
     # Parámetros kwargs
     #  - campo_qt: Campo qt asociado al ifCampo. Si no existe se crea uno nuevo
     #  - param: Parámetros extra para la creación de cada ifCampo
     
-    param = kwargs.pop('param', [])
-           
     ifCampo = eval(tipoIf+"(parent=if_widget)")
-    ifCampo.inicializa(conMst, campoMst, param)
+    ifCampo.inicializa(conMst, campoMst, *args)
     '''
     elif (tipoIf == 'ifRefExt'):
         ifCampo = ifRefExt(qtCmp, if_widget.valListas[param[0]], param[1], conMst, campoMst)

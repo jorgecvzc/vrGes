@@ -33,7 +33,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QTableWidget" name="twTareas">
+      <widget class="ifTabla" name="twTareas">
        <property name="sizeAdjustPolicy">
         <enum>QAbstractScrollArea::AdjustToContents</enum>
        </property>
@@ -78,7 +78,7 @@
       </widget>
      </item>
      <item row="0" column="1">
-      <widget class="QLineEdit" name="leRef">
+      <widget class="ifCadena" name="leRef">
        <property name="maximumSize">
         <size>
          <width>200</width>
@@ -109,7 +109,7 @@
       </widget>
      </item>
      <item row="1" column="1">
-      <widget class="QLineEdit" name="leNombre">
+      <widget class="ifCadena" name="leNombre">
        <property name="maximumSize">
         <size>
          <width>800</width>
@@ -137,7 +137,7 @@
       </widget>
      </item>
      <item row="2" column="1">
-      <widget class="QPlainTextEdit" name="ptObs">
+      <widget class="ifTexto" name="ptObs">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
          <horstretch>0</horstretch>
@@ -156,6 +156,23 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>ifCadena</class>
+   <extends>QLineEdit</extends>
+   <header>Interfaz/ifCampos.h</header>
+  </customwidget>
+  <customwidget>
+   <class>ifTexto</class>
+   <extends>QPlainTextEdit</extends>
+   <header>Interfaz/ifCampos.h</header>
+  </customwidget>
+  <customwidget>
+   <class>ifTabla</class>
+   <extends>QTableWidget</extends>
+   <header>Interfaz/ifCampos.h</header>
+  </customwidget>
+ </customwidgets>
  <tabstops>
   <tabstop>leRef</tabstop>
   <tabstop>leNombre</tabstop>

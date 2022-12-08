@@ -105,10 +105,7 @@ class ifDgMstBusqueda(QtWidgets.QDialog):
                 if not dato in camposSel:
                     camposSel.append(dato)
         return camposSel 
-        
-
-
-     
+    
 '''
 CLASE DE INTERFAZ DE MAESTRO
 '''
@@ -127,7 +124,7 @@ class ifMaestro(QtWidgets.QWidget):
         # Inicializa ControlUinf, Manejador, Tunel de Señales y Maestro
         self.cuinf = control_uinfs
         self.mnj = control_uinfs.mnjMaestros()
-        self.mnjListas = control_uinfs.mnjMaestros()
+        self.mnjListas = control_uinfs.mnjListas()
         self.senyalMaestro = TunelSenyal('if'+self.TipoMaestro.capitalize())
         self.senyalMaestro.asignaTunel(self.trataSenyal)
         self.maestro = None
@@ -173,9 +170,8 @@ class ifMaestro(QtWidgets.QWidget):
         '''
         Remite la tecla al ifCampo actual para que la procese
         '''
-        if self.focusWidget():
+        if (key == 16777220) and (self.focusWidget()):
             pfw = self.focusWidget().parent().parent()
-            print(self.focusWidget().parent())
             if isinstance(pfw, ifTabla):
                 if pfw.posUltima():
                     pfw.conMst().nuevaLinea(pfw.campoMst)
@@ -245,15 +241,17 @@ class ifMaestro(QtWidgets.QWidget):
     # primeraAccion a procesar llamada por la página principal
     def primeraAccion (self):
         # Carga el primer maestro en la interfaz
-        self.cargaMaestro('pri')
+        if not self.cargaMaestro('pri'):
+            self.nuevo()
                 
     # Fucniones de navegación sobre los maestros almacenados
     def cargaMaestro(self, mov):
         if self.guardarSiCambios():
             idm = self.maestro.getId()
-            self.mnj.descarta()
-
-            mst = self.mnj.cargaMaestro(tipo=self.TipoMaestro, filtro={'campos': {'id': idm}}, mov=mov) 
+            mst = self.mnj.cargaMaestro(
+                tipo=self.TipoMaestro, 
+                filtro={'campos': {'id': idm}}, 
+                mov=mov) 
             if mst:
                 if mst != self.maestro:
                     self.maestro = mst

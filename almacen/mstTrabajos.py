@@ -10,6 +10,7 @@ from sqlalchemy import (
 from sqlalchemy.schema import ForeignKey
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.orderinglist import ordering_list
+from sqlalchemy.sql import expression
 
 from .uInfs import Base, Maestro, MaestroLineas
 
@@ -19,7 +20,7 @@ from .uInfs import Base, Maestro, MaestroLineas
 class Tarea (Maestro, Base):
     __tablename__ = 'Tareas'
     
-    id = Column('tarId', Integer, primary_key=True)
+    id = Column('tarId', SmallInteger, primary_key=True)
     ref = Column('tarRef', String(3), nullable=False)
     nombre = Column('tarNombre', String(100), nullable=False)
     descripcion = Column('tarDescripcion', String(150), nullable=True)
@@ -49,11 +50,11 @@ class ProcesoTarea (Maestro, Base):
     id = Column('protaId', SmallInteger, primary_key=True)
     orden = Column('protaOrden', SmallInteger)
     tareaId = Column('protaTarea', SmallInteger, ForeignKey('Tareas.tarId'))
-    tareaRef = Column('protaTareaRef', String(3))
     observaciones = Column('protaObs', String(150), nullable=True)
-    unica = Column('protaUnica', Boolean, default=False, nullable=False)
+    unica = Column('protaUnica', Boolean, nullable=False)
+
+    tarea = relationship('Tarea')
 
     def __str__ (self):
-        return '<Tarea de Proceso (Línea="%s", Tarea="%s")' % (self.orden, self.tareaRef)
-
-
+        return '<Tarea de Proceso (Línea="%s", Tarea="%s", Única="%s")>' % (
+            self.orden, self.tareaId, self.unica)

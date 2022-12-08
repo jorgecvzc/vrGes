@@ -3,7 +3,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm import declarative_base
 #
-from .Manejadores import MnjMaestros, MnjConsultas
+from .Manejadores import MnjMaestros, MnjListas, MnjConsultas
 
 class ControlUinfs (object):
 
@@ -22,6 +22,11 @@ class ControlUinfs (object):
         # Devuelve un Manejador de Maestros
         session = sessionmaker(bind=self.bd, autoflush=False)
         return MnjMaestros(session())
+    
+    def mnjListas(self):
+        # Devuelve un Manejador de Maestros
+        session = sessionmaker(bind=self.bd, autoflush=False)
+        return MnjListas(session())
 
     def mnjConsultas(self):
         # Devuelve un Manejador de Consultas

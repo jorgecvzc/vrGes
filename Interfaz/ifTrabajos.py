@@ -68,9 +68,16 @@ class ifProcesos(ifMaestro):
     TipoMaestro="Trabajos.Proceso"
     Interfaz = "wdProcesos"
 
-    #twLineasCols = {'tareaRef':'Tarea','tareaNombre':'Nombre', 'unica':'Tarea Única', 'observaciones':'Observaciones'}
-    linTarea = {'tareaRef':'Tarea','unica':'Tarea Única', 'observaciones':'Observaciones'}
-    
+    ListasMst = {
+        'lTareas': ('Trabajos.Tarea', ['nombre', 'ref'])
+    }   
+
+    linTarea = {
+        'Tarea': ('ifRefExt', 'lTareas', 'ref', 'tarea'),
+        'Única': ('ifVerificacion', [], 'unica'),
+        'Observaciones': ('ifCadena', 'observaciones'),
+    }
+
     Campos = {
         'leRef': ('ifCadena', 'ref'),
         'leNombre': ('ifCadena', 'nombre'),
@@ -104,8 +111,9 @@ class ifProcesos(ifMaestro):
                 super().actualizaMaestro(nombre_campo, valor)
         else:
             super().actualizaMaestro(nombre_campo, valor)
-    
     '''
+
+
 class ifTareas(ifMaestro):
     '''
     Clase para el manejo de la interfaz del maestro Tarea
