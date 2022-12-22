@@ -26,7 +26,7 @@ cursor.execute("SELECT TARTICULOS1, TARTICULOS4 As Nombre, TARTICULOS6 As Descr,
 
 # Crea un manejador para añadir los productos
 mnj = Gestion('..').cUInf.mnjMaestros()
-articulo_busqueda = mnj.nuevoMaestro('Articulos.Articulo', almacena=False)
+articulo_busqueda = mnj.nuevoMaestro('Articulos.Articulo', almacenar=False)
 almacena = False
 
 i, j, k, progreso = 0, 0, 0, 0
@@ -56,11 +56,10 @@ for row in cursor.fetchall():
     if ref:
         i += 1            
         articulo_busqueda['ref'] = ref 
-        articulo = mnj.cargaMaestro(mst_ref=articulo_busqueda)
-
+        articulo = mnj.cargaMaestro(mst_ref=articulo_busqueda, vaciado=False)
         if not articulo:
             articulo = mnj.nuevoMaestro('Articulos.Articulo')
-            alnacena = True
+            almacena = True
             i += 1
         else:
             almacena = False
@@ -75,8 +74,7 @@ for row in cursor.fetchall():
         #articulo['control'] = 1
 
         if not(progreso%100) or almacena:
-            print('======== ' + str(total-progreso) + ' == Procesados: ', j,  '== Session: ' + str(len(list(mnj.session))))    
-
+            print('======== ' + str(total-progreso) + ' == Procesados: ', progreso,  '== Session: ' + str(len(list(mnj.session))))    
             mnj.almacena()
             mnj.descarta()
         

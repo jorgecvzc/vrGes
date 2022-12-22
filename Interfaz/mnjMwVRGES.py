@@ -4,46 +4,41 @@ Created on 4 sept. 2020
 @author: cortesj
 '''
 import sys
-from PyQt5 import QtWidgets
+from PyQt5 import QtCore, QtWidgets
 from PyQt5 import uic
 from Interfaz.mnjDgPedidos import ifPedidos
-from Interfaz.ifArticulos import ifArticulos, ifModificadoresArt, ifVariantesArt
-from Interfaz.ifTrabajos import ifTrabajos, ifProcesos, ifTareas, ifPosiciones
+from Interfaz.ifArticulos import ifArticulos, ifModificadoresArt, ifVariantesArt, ifPosiciones
+from Interfaz.ifTrabajos import ifTrabajos, ifProcesos, ifTareas
+from Interfaz import ifPersonas
 
 
 class MainWindow(QtWidgets.QMainWindow):
     def __init__(self, mc, *args, **kwargs):
         super().__init__(*args, **kwargs)
+                 
         uic.loadUi("Interfaz/Diseño/mwVRGES.ui", self)
         self.cm = mc
-        
-        ifs = {'Pedidos': ['Pedido', 'Articulo'], 
-               'Articulos': ['Articulo'],
-               'Posiciones': ['Posicion'], 
-               'Tareas': ['Tarea'],
-               'Procesos': ['Proceso', 'Tarea'],
-               'Trabajos': ['Trabajo', 'Proceso','Tarea', 'Posicion', 'Cliente', 'Articulo'],
-               'ModificadoresArt': ['ModificadorArt'],
-               'VariantesArt': ['VarianteArt']
-               }
-        self.uis = {'Pedidos': (lambda: ifPedidos(self.cm)), 
-               'Articulos': (lambda: ifArticulos(self.cm)),
-               'ModificadoresArt': (lambda: ifModificadoresArt(self.cm)),
-               'VariantesArt': (lambda: ifVariantesArt(self.cm)),
-               'Posiciones': (lambda: ifPosiciones(self.cm)),
-               'Tareas': (lambda: ifTareas(self.cm)),
-               'Procesos': (lambda: ifProcesos(self.cm)),
-               'Trabajos': (lambda: ifTrabajos(self.cm))
-               }
 
-        self.actPedidos.triggered.connect(lambda: self.abrirVentana('Pedidos'))
-        self.actArticulos.triggered.connect(lambda: self.abrirVentana('Articulos'))
-        self.actVariantesArt.triggered.connect(lambda: self.abrirVentana('VariantesArt'))
-        self.actModificadoresArt.triggered.connect(lambda: self.abrirVentana('ModificadoresArt'))
-        self.actPosiciones.triggered.connect(lambda: self.abrirVentana('Posiciones'))
-        self.actTareas.triggered.connect(lambda: self.abrirVentana('Tareas'))
-        self.actProcesos.triggered.connect(lambda: self.abrirVentana('Procesos'))
-        self.actTrabajos.triggered.connect(lambda: self.abrirVentana('Trabajos'))
+        self.uis = {'actPedidos': (lambda: ifPedidos(self.cm)), 
+               'actArticulos': (lambda: ifArticulos(self.cm)),
+               'actModificadoresArt': (lambda: ifModificadoresArt(self.cm)),
+               'actVariantesArt': (lambda: ifVariantesArt(self.cm)),
+               'actPosiciones': (lambda: ifPosiciones(self.cm)),
+               'actTareas': (lambda: ifTareas(self.cm)),
+               'actProcesos': (lambda: ifProcesos(self.cm)),
+               'actTrabajos': (lambda: ifTrabajos(self.cm)),
+               'actPosiciones': (lambda: ifPosiciones(self.cm)),
+               
+               'actClientes': (lambda: ifPersonas.ifClientes(self.cm)),
+               'actProveedores': (lambda: ifPersonas.ifProveedores(self.cm)),
+               }
+        
+        self.mnuMaestros.triggered.connect(self.abrirVentana)
+
+        self.salirAction = QtWidgets.QAction('Salir', self)
+        self.mnuPrinc.addAction(self.salirAction)
+        self.salirAction.triggered.connect(self.close)
+        
         
         self.mdiArea.cascadeSubWindows()
 
@@ -60,25 +55,29 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actCerrarVentana.triggered.connect(lambda: self.cerrarVentana())
         
         self.actLogImp.triggered.connect(lambda: self.acMaestro('i'))
-        
-        self.abrirVentana('Procesos')
 
-    def abrirVentana(self, if_nombre):
-        try:    
-            ui = self.uis.get(if_nombre, lambda: None)()
-            if ui:
-                self.mdiArea.addSubWindow(ui)
-                ui.showMaximized()
-                ui.primeraAccion()
-        except:
-            msg = QtWidgets.QMessageBox()
-            msg.setIcon(QtWidgets.QMessageBox.Information)
-            msg.setWindowTitle("Mensaje Error")
-            msg.setText("Error inesperado: " + str(sys.exc_info()[0]))
-            msg.setInformativeText(str(sys.exc_info()[1]))
-            msg.setStandardButtons(QtWidgets.QMessageBox.Ok)
-            msg.exec_()        
-
+    @QtCore.pyqtSlot(QtWidgets.QAction)
+    def abrirVentana(self, action):
+        if (action.objectName() != 'actCerrarVentana'):
+            try:
+                ui = self.uis.get(action.objectName(), lambda: None)()
+                if ui:
+                    self.mdiArea.addSubWindow(ui)
+                    ui.showMaximized()
+                    ui.primeraAccion()
+            except:
+                error_dialog = QtWidgets.QErrorMessage(self)
+                error_dialog.setWindowModality(QtCore.Qt.WindowModal)
+                error_dialog.showMessage("Error inesperado: " + 
+                                         str(sys.exc_info()[0]) +'\n' + 
+                                         str(sys.exc_info()[1]))                
+                #msg = QtWidgets.QMessageBox()
+                #msg.setIcon(QtWidgets.QMessageBox.Information)
+                #msg.setWindowTitle("Mensaje Error")
+                #msg.setText("Error inesperado: " + str(sys.exc_info()[0]))
+                #msg.setInformativeText(str(sys.exc_info()[1]))
+                #msg.setStandardButtons(QtWidgets.QMessageBox.Ok)
+            
     def cerrarVentana(self):
         try:
             if self.mdiArea.activeSubWindow():

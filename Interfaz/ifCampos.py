@@ -1,12 +1,14 @@
 from sqlalchemy.orm import object_session
 
-from PyQt5 import QtCore, QtWidgets
+from PyQt5 import QtCore, QtWidgets, QtGui
 from PyQt5.Qt import (
-    QTableWidget, 
     QLineEdit, 
-    QComboBox, 
     QPlainTextEdit, 
-    QCheckBox)
+    QCheckBox,
+    QListView,
+    QComboBox, 
+    QTableWidget,
+    )
 from PyQt5.QtWidgets import QCompleter
 
 import log
@@ -79,6 +81,8 @@ class ifRefExt(QLineEdit, ifCampo):
     def inicializa(self, con_mst, campo,*args):
         self.campoMst = campo
         self.lista = args[-1][args[-3]] # lista_mst
+        if not self.lista:
+            self.lista = []
         self.campoLista = args[-2]
         
         self.lRef = [str(l[self.campoLista]) for l in self.lista]
@@ -185,47 +189,64 @@ class ifVerificacion(ifCampo, QCheckBox):
             for elem in self.qtsHabil:
                 elem.setEnabled(self.getValor())
     
-class ifListaD(ifCampo):
+class ifListaExtVista (ifCampo, QListView):
     '''
-    Objetos de interfaz que muestran una lista desplegable para seleccionar un elemento e internamente su índice
-    '''
-    def __init__(self, qtComboBox, lista_mst, conMst, campo):
-        self.qcb = qtComboBox
-        self.qcb.clear()
-        self.qcb.addItems(['']+lista_mst[1])
-        self.lid = ['']+lista_mst[0]
-        self.qcb.currentIndexChanged.connect(lambda: conMst().__setitem__(campo, self.getValor())) 
-
-    def getValor(self):
-        if self.qcb.currentIndex():
-            return int(self.lid[self.qcb.currentIndex()])
-        else:
-            return None
-                
-    def setValor(self, valor):
-        if valor != self.getValor():
-            if valor:
-                self.qcb.blockSignals(True)          
-                self.qcb.setCurrentIndex(self.lid.index(int(valor)))
-                self.qcb.blockSignals(False)
-            else:
-                self.limpia()
-     
-    def limpia(self):
-        self.qcb.blockSignals(True)            
-        self.qcb.setCurrentIndex(0)
-        self.qcb.blockSignals(False)
-            
-            
-class ifListaExt(ifCampo, QComboBox):
-    '''
-    Objetos de interfaz que muestran un indice y su correspondencia en una lista desplegable
+    Campo que muestra una lista de maestros y guarda la correlación de sus indices
     '''
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.conMst = None          
         self.campoMst = None
-        self.lista = None        
+        self.lista = []        
+        self.lRef = None
+
+    def inicializa(self, con_mst, campo,*args):        
+        # *args: nombre_lista_mst, campo_lista, listas
+        self.conMst = con_mst
+        self.campoMst = campo
+      
+        model = QtGui.QStandardItemModel()
+        self.setModel(model)  
+        self.model().clear()
+        l = args[-1][args[0]]
+        self.campoLista = args[1]
+        if l: 
+            self.lista = l
+            self.addItems(['']+self.lista.col(self.campoLista))
+
+        #self.currentIndexChanged.connect(            lambda: self.conMst().__setitem__(self.campoMst, self.getValor()))
+
+    def getValor(self):
+        ci = self.model().currentIndex()
+        if ci:
+            return object_session(self.conMst()).merge(self.lista[ci-1])
+        else:
+            return None
+            
+    def setValor(self, valor):
+        if valor != self.getValor():
+            self.blockSignals(True)
+            if valor:
+                self.setCurrentText(valor[self.campoLista])
+            else:
+                self.limpia()
+            self.blockSignals(False)
+     
+    def limpia(self):
+        self.blockSignals(True)
+        #self.setCurrentIndex(0)
+        self.blockSignals(False)
+            
+            
+class ifDesplegableExt (ifCampo, QComboBox):
+    '''
+    Campo que almacena indices y nmuestra sus correspondencias en una lista desplegable
+    '''
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.conMst = None          
+        self.campoMst = None
+        self.lista = []        
         self.lRef = None
 
     def inicializa(self, con_mst, campo,*args):        
@@ -234,10 +255,11 @@ class ifListaExt(ifCampo, QComboBox):
         self.campoMst = campo
         
         self.clear()
-        self.lista = args[-1][args[0]]
-                        
+        l = args[-1][args[0]]
         self.campoLista = args[1]
-        self.addItems(['']+self.lista.col(self.campoLista))
+        if l: 
+            self.lista = l
+            self.addItems(['']+self.lista.col(self.campoLista))
 
         self.currentIndexChanged.connect(
             lambda: self.conMst().__setitem__(self.campoMst, self.getValor()))
@@ -265,7 +287,7 @@ class ifListaExt(ifCampo, QComboBox):
         
 
         
-class ifLineaTabla(object):
+class ifLineaTabla (object):
     def __init__(self, mst):
         self.maestro = mst
         
@@ -273,7 +295,7 @@ class ifLineaTabla(object):
         return self.maestro
     
     
-class ifTabla(ifCampo, QTableWidget):
+class ifTabla (ifCampo, QTableWidget):
     '''
     Objetos de interfaz para el manejo de tablas
     '''

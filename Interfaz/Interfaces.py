@@ -144,7 +144,6 @@ class ifMaestro(QtWidgets.QWidget):
         
         # Carga la interfaz gráfica
         uic.loadUi('Interfaz/Diseño/'+self.Interfaz+'.ui', self)
-        self.leNombre
 
         # Se crean los campos de interfaz
         for campoIf, campoConf in self.Campos.items():
@@ -248,10 +247,15 @@ class ifMaestro(QtWidgets.QWidget):
     def cargaMaestro(self, mov):
         if self.guardarSiCambios():
             idm = self.maestro.getId()
-            mst = self.mnj.cargaMaestro(
-                tipo=self.TipoMaestro, 
-                filtro={'campos': {'id': idm}}, 
-                mov=mov) 
+            if mov not in ['pri', 'ult']:
+                mst = self.mnj.cargaMaestro(
+                    tipo=self.TipoMaestro, 
+                    filtro={'campos': {'id': idm}}, 
+                    mov=mov)
+            else:
+                mst = self.mnj.cargaMaestro(
+                    tipo=self.TipoMaestro, 
+                    mov=mov) 
             if mst:
                 if mst != self.maestro:
                     self.maestro = mst
@@ -278,8 +282,8 @@ class ifMaestro(QtWidgets.QWidget):
     def borra(self):
         buttonReply = QMessageBox.question(self, 'Eliminación', "¿Desea eliminar el registro actual?", QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
         if buttonReply == QMessageBox.Yes:
-            if self.mnj.borraMaestro(self.maestro):
-                self.vaciaIfCampos()      
+            if self.mnj.borra(self.maestro):
+                self.vaciaIfCampos()    
     
     def abrirBusquedaMaestro(self):
         # Si hay definida una busqueda para el maestro se abre

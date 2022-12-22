@@ -78,7 +78,7 @@
        </widget>
       </item>
       <item>
-       <widget class="ifListaExt" name="cbVariante">
+       <widget class="ifDesplegableExt" name="cbVariante">
         <property name="minimumSize">
          <size>
           <width>0</width>
@@ -200,7 +200,7 @@
    <header>Interfaz/ifCampos.h</header>
   </customwidget>
   <customwidget>
-   <class>ifListaExt</class>
+   <class>ifDesplegableExt</class>
    <extends>QComboBox</extends>
    <header>Interfaz/ifCampos.h</header>
   </customwidget>

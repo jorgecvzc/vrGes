@@ -7,7 +7,7 @@ import sys
 import configparser
 import pathlib
 
-from almacen import ControlUinfs
+from Almacen import ControlUinfs
 from Interfaz.mnjMwVRGES import MainWindow, QtWidgets
 
 from Utils import BDMantenimiento

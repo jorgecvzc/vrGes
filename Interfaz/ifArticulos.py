@@ -52,6 +52,19 @@ class ifArticulos(ifMaestro):
         super().trataSenyal(fuente, senyal, *args)
     '''        
 
+class ifPosiciones(ifMaestro):
+    '''
+    Clase para el manejo de la interfaz de la clase Posiciones
+    '''
+    TipoMaestro="Articulos.Posicion"
+    Interfaz = "Articulos/wdPosiciones"
+
+    Campos = {
+        'leRef': ('ifCadena', 'ref'),
+        'leNombre': ('ifCadena', 'nombre'),
+    }
+    
+
 class ifVariantesArt(ifMaestro):
     '''
     Clase para el manejo de la interfaz de la clase ModificadoresArt
@@ -88,7 +101,7 @@ class ifModificadoresArt(ifMaestro):
         'leRef': ('ifCadena', 'ref'),
         'leNombre': ('ifCadena', 'nombre'),
         'leVariante': ('ifRefExt', 'lVariantesArt', 'ref', 'variante'),
-        'cbVariante': ('ifListaExt', 'lVariantesArt', 'nombre', 'variante')
+        'cbVariante': ('ifDesplegableExt', 'lVariantesArt', 'nombre', 'variante')
     }    
 
     BusquedaMaestro = (['ref', 'nombre'], ['ref', 'nombre'])

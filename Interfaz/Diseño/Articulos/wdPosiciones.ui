@@ -50,15 +50,15 @@
        </font>
       </property>
       <property name="text">
-       <string>Nombre: </string>
+       <string>Ref: </string>
       </property>
       <property name="buddy">
-       <cstring>leNombre</cstring>
+       <cstring>leRef</cstring>
       </property>
      </widget>
     </item>
     <item row="0" column="1">
-     <widget class="QLineEdit" name="leNombre">
+     <widget class="ifCadena" name="leRef">
       <property name="font">
        <font>
         <pointsize>12</pointsize>
@@ -75,15 +75,15 @@
        </font>
       </property>
       <property name="text">
-       <string>Descripción:</string>
+       <string>Nombre:</string>
       </property>
       <property name="buddy">
-       <cstring>leDescripcion</cstring>
+       <cstring>leNombre</cstring>
       </property>
      </widget>
     </item>
     <item row="1" column="1">
-     <widget class="QLineEdit" name="leDescripcion">
+     <widget class="ifCadena" name="leNombre">
       <property name="font">
        <font>
         <pointsize>12</pointsize>
@@ -92,15 +92,22 @@
      </widget>
     </item>
    </layout>
-   <zorder>leDescripcion</zorder>
    <zorder>leNombre</zorder>
+   <zorder>leRef</zorder>
    <zorder>label_2</zorder>
    <zorder>label_3</zorder>
   </widget>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>ifCadena</class>
+   <extends>QLineEdit</extends>
+   <header>Interfaz/ifCampos.h</header>
+  </customwidget>
+ </customwidgets>
  <tabstops>
+  <tabstop>leRef</tabstop>
   <tabstop>leNombre</tabstop>
-  <tabstop>leDescripcion</tabstop>
  </tabstops>
  <resources/>
  <connections/>

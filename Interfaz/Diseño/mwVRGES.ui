@@ -10,7 +10,7 @@
     <x>0</x>
     <y>0</y>
     <width>813</width>
-    <height>598</height>
+    <height>600</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -49,72 +49,6 @@
      </widget>
     </item>
    </layout>
-  </widget>
-  <widget class="QMenuBar" name="menubar">
-   <property name="geometry">
-    <rect>
-     <x>0</x>
-     <y>0</y>
-     <width>813</width>
-     <height>29</height>
-    </rect>
-   </property>
-   <widget class="QMenu" name="mnuMaestros">
-    <property name="title">
-     <string>Maestros</string>
-    </property>
-    <widget class="QMenu" name="menuArt_culos">
-     <property name="title">
-      <string>Artículos</string>
-     </property>
-     <addaction name="actArticulos"/>
-     <addaction name="actModificadoresArt"/>
-     <addaction name="actVariantesArt"/>
-    </widget>
-    <addaction name="menuArt_culos"/>
-    <addaction name="actPedidos"/>
-    <addaction name="actTrabajos"/>
-    <addaction name="actProcesos"/>
-    <addaction name="actTareas"/>
-    <addaction name="actPosiciones"/>
-    <addaction name="actCerrarVentana"/>
-   </widget>
-   <widget class="QMenu" name="mnuNavegar">
-    <property name="title">
-     <string>Operaciones</string>
-    </property>
-    <widget class="QMenu" name="menuVe_a_Registro">
-     <property name="title">
-      <string>Ve a Registro</string>
-     </property>
-     <addaction name="actOpRegPrimero"/>
-     <addaction name="actOpRegAnterior"/>
-     <addaction name="actOpRegSiguiente"/>
-     <addaction name="actOpRegUltimo"/>
-    </widget>
-    <addaction name="actOpNuevo"/>
-    <addaction name="actOpGuardar"/>
-    <addaction name="actOpEliminar"/>
-    <addaction name="separator"/>
-    <addaction name="menuVe_a_Registro"/>
-    <addaction name="separator"/>
-    <addaction name="actOpBuscar"/>
-   </widget>
-   <widget class="QMenu" name="menuImprime_MAESTRO">
-    <property name="title">
-     <string>Log</string>
-    </property>
-    <addaction name="actLogImp"/>
-   </widget>
-   <widget class="QMenu" name="menuSalir">
-    <property name="title">
-     <string>Salir</string>
-    </property>
-   </widget>
-   <addaction name="mnuMaestros"/>
-   <addaction name="mnuNavegar"/>
-   <addaction name="menuImprime_MAESTRO"/>
-   <addaction name="menuSalir"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <widget class="QToolBar" name="tbPrincipal">
@@ -164,6 +98,68 @@
    </attribute>
    <addaction name="actOpGuardar"/>
    <addaction name="actCerrarVentana"/>
+  </widget>
+  <widget class="QMenuBar" name="mnuPrinc">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>813</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="mnuMaestros">
+    <property name="title">
+     <string>Maestros</string>
+    </property>
+    <widget class="QMenu" name="menuArt_culos">
+     <property name="title">
+      <string>Artículos</string>
+     </property>
+     <addaction name="actArticulos"/>
+     <addaction name="actModificadoresArt"/>
+     <addaction name="actVariantesArt"/>
+     <addaction name="actPosiciones"/>
+    </widget>
+    <addaction name="menuArt_culos"/>
+    <addaction name="actProveedores"/>
+    <addaction name="actClientes"/>
+    <addaction name="actPedidos"/>
+    <addaction name="actTrabajos"/>
+    <addaction name="actProcesos"/>
+    <addaction name="actTareas"/>
+    <addaction name="actCerrarVentana"/>
+   </widget>
+   <widget class="QMenu" name="mnuNavegar">
+    <property name="title">
+     <string>Operaciones</string>
+    </property>
+    <widget class="QMenu" name="menuVe_a_Registro">
+     <property name="title">
+      <string>Ve a Registro</string>
+     </property>
+     <addaction name="actOpRegPrimero"/>
+     <addaction name="actOpRegAnterior"/>
+     <addaction name="actOpRegSiguiente"/>
+     <addaction name="actOpRegUltimo"/>
+    </widget>
+    <addaction name="actOpNuevo"/>
+    <addaction name="actOpGuardar"/>
+    <addaction name="actOpEliminar"/>
+    <addaction name="separator"/>
+    <addaction name="menuVe_a_Registro"/>
+    <addaction name="separator"/>
+    <addaction name="actOpBuscar"/>
+   </widget>
+   <widget class="QMenu" name="menuImprime_MAESTRO">
+    <property name="title">
+     <string>Log</string>
+    </property>
+    <addaction name="actLogImp"/>
+   </widget>
+   <addaction name="mnuMaestros"/>
+   <addaction name="mnuNavegar"/>
+   <addaction name="menuImprime_MAESTRO"/>
   </widget>
   <action name="actPedidos">
    <property name="text">
@@ -287,6 +283,16 @@
   <action name="actVariantesArt">
    <property name="text">
     <string>Variantes</string>
+   </property>
+  </action>
+  <action name="actProveedores">
+   <property name="text">
+    <string>Proveedores</string>
+   </property>
+  </action>
+  <action name="actClientes">
+   <property name="text">
+    <string>Clientes</string>
    </property>
   </action>
  </widget>
