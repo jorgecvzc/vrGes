@@ -312,6 +312,7 @@ class ifMaestro(QtWidgets.QWidget):
         # Si hay definida una busqueda para el maestro se abre
         dmst = ifDgMst(self)
         dmst.dw.setWidget(ui)
+        ui.maestro['cliente'] = self.maestro.getId()         
         dmst.exec()
 
         campoB = ui.maestro['nombre']
@@ -322,7 +323,6 @@ class ifMaestro(QtWidgets.QWidget):
         # Si hay definida una busqueda para el maestro se abre
         if self.BusquedaMaestro and self.guardarSiCambios():
             ui = ifDgMstBusqueda(self.cuinf, self.TipoMaestro, self.BusquedaMaestro[0], self.BusquedaMaestro[1])
-            ui.maestro['cliente'] = self.maestro.getId() 
             if ui:
                 ui.exec()
             campoB = ui.campoFilasSelec('id')
