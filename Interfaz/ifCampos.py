@@ -1,3 +1,4 @@
+from sqlalchemy import select
 from sqlalchemy.orm import object_session
 
 from PyQt5 import QtCore, QtWidgets, QtGui
@@ -5,7 +6,7 @@ from PyQt5.Qt import (
     QLineEdit, 
     QPlainTextEdit, 
     QCheckBox,
-    QListView,
+    QListWidget,
     QComboBox, 
     QTableWidget,
     )
@@ -44,9 +45,9 @@ class ifCadena(QLineEdit, ifCampo):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
  
-    def inicializa(self, conMst, campoMst, *args):
-        self.conMst = conMst
-        self.campoMst = campoMst  
+    def inicializa(self, con_mst, campo_mst, *args):
+        self.conMst = con_mst
+        self.campoMst = campo_mst  
         self.editingFinished.connect(lambda: self.conMst().__setitem__(self.campoMst, self.getValor())) 
            
     def getValor(self):
@@ -68,56 +69,33 @@ class ifCadena(QLineEdit, ifCampo):
             print('return key pressed')
         else:
             print('key pressed: %s' % key)
+            
 
-class ifRefExt(QLineEdit, ifCampo):
-    '''
-    Objetos de interfaz para mostrar una cadena asociada a un campo de tipo Externo
-    '''
+class ifCadenaExt (QLineEdit, ifCampo):
+    # Las Cadenas de tipo Ext solo podrán mostrar información, no actualizarla
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.lista = None        
-        self.lRef = None
+        self.setEnabled(False)
+ 
+    def inicializa(self, con_mst, campo_mst, *args):
+        self.conMst = con_mst
+        self.campoMst = campo_mst
+        self.campoExt = args[0]
            
-    def inicializa(self, con_mst, campo,*args):
-        self.campoMst = campo
-        self.lista = args[-1][args[-3]] # lista_mst
-        if not self.lista:
-            self.lista = []
-        self.campoLista = args[-2]
-        
-        self.lRef = [str(l[self.campoLista]) for l in self.lista]
-        qCompleter = QCompleter(self.lRef)
-        self.setCompleter(qCompleter)
-
-        self.conMst = con_mst        
-
-        self.editingFinished.connect(
-            lambda: self.conMst().__setitem__(self.campoMst, self.getValor())) 
-
     def getValor(self):
-        valor = self.text()
-        if valor in self.lRef:
-            ext = self.lista[self.lRef.index(valor)]
-            return object_session(self.conMst()).merge(ext)
-        else:
-            return None
+        return self.text()
     
     def setValor(self, valor):
         if valor != self.getValor():
             if valor:
-                self.setText(str(valor[self.campoLista]))
+                self.setText(str(valor[self.campoExt]))
             else:
                 self.clear()
         
     def limpia(self):
         self.clear()
+
         
-    def procesaTeclas(self, key):
-        if key == QtCore.Qt.Key_Return:
-            print('return key pressed')
-        else:
-            print('key pressed: %s' % key)
-            
 class ifTexto(ifCampo, QPlainTextEdit):
     '''
     Objetos de interfaz para mostrar una cadena
@@ -188,56 +166,60 @@ class ifVerificacion(ifCampo, QCheckBox):
         if self.qtsHabil:
             for elem in self.qtsHabil:
                 elem.setEnabled(self.getValor())
+
     
-class ifListaExtVista (ifCampo, QListView):
+class ifRefExtLista(QLineEdit, ifCampo):
     '''
-    Campo que muestra una lista de maestros y guarda la correlación de sus indices
+    Objetos de interfaz para mostrar una cadena asociada a un campo de tipo Externo
     '''
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.conMst = None          
-        self.campoMst = None
-        self.lista = []        
+        self.lista = None        
         self.lRef = None
-
-    def inicializa(self, con_mst, campo,*args):        
-        # *args: nombre_lista_mst, campo_lista, listas
-        self.conMst = con_mst
+           
+    def inicializa(self, con_mst, campo, *args):
         self.campoMst = campo
-      
-        model = QtGui.QStandardItemModel()
-        self.setModel(model)  
-        self.model().clear()
-        l = args[-1][args[0]]
-        self.campoLista = args[1]
-        if l: 
-            self.lista = l
-            self.addItems(['']+self.lista.col(self.campoLista))
-
-        #self.currentIndexChanged.connect(            lambda: self.conMst().__setitem__(self.campoMst, self.getValor()))
-
-    def getValor(self):
-        ci = self.model().currentIndex()
-        if ci:
-            return object_session(self.conMst()).merge(self.lista[ci-1])
+        if args[1]:
+            self.lista = args[-1][args[1]] # lista_mst
         else:
-            return None
-            
+            self.lista = []
+        self.campoLista = args[0]
+        
+        self.lRef = [str(l[self.campoLista]) for l in self.lista]
+        qCompleter = QCompleter(self.lRef)
+        self.setCompleter(qCompleter)
+
+        self.conMst = con_mst        
+        
+        # El campo inicializa puede devolver unas siglas que indicarán una orden para la ingerfaz
+        return 'av'
+    
+    def getValor(self):
+        valor = self.text()
+        result = None
+        if self.lRef:
+            if valor in self.lRef:
+                ext = self.lista[self.lRef.index(valor)]
+                result = object_session(self.conMst()).merge(ext)
+        else:
+            mstExt = getattr(self.conMst().__class__, self.campoMst)
+            mstExt = mstExt.property.mapper.class_
+            stmt = select(mstExt).where(getattr(mstExt, self.campoLista) == valor)
+            ext = object_session(self.conMst()).execute(stmt).fetchone()
+            if ext: result = object_session(self.conMst()).merge(ext[0])
+        return result
+    
     def setValor(self, valor):
         if valor != self.getValor():
-            self.blockSignals(True)
             if valor:
-                self.setCurrentText(valor[self.campoLista])
+                self.setText(str(valor[self.campoLista]))
             else:
-                self.limpia()
-            self.blockSignals(False)
-     
+                self.clear()
+        
     def limpia(self):
-        self.blockSignals(True)
-        #self.setCurrentIndex(0)
-        self.blockSignals(False)
-            
-            
+        self.clear()
+    
+
 class ifDesplegableExt (ifCampo, QComboBox):
     '''
     Campo que almacena indices y nmuestra sus correspondencias en una lista desplegable
@@ -255,8 +237,8 @@ class ifDesplegableExt (ifCampo, QComboBox):
         self.campoMst = campo
         
         self.clear()
-        l = args[-1][args[0]]
-        self.campoLista = args[1]
+        l = args[-1][args[1]]
+        self.campoLista = args[0]
         if l: 
             self.lista = l
             self.addItems(['']+self.lista.col(self.campoLista))
@@ -284,9 +266,56 @@ class ifDesplegableExt (ifCampo, QComboBox):
         self.blockSignals(True)
         self.setCurrentIndex(0)
         self.blockSignals(False)
-        
+  
+    
+class ifLista (ifCampo, QListWidget):
+    '''
+    Campo que muestra una lista de maestros y guarda la correlación de sus indices
+    '''
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.conMst = None          
+        self.campoMst = None
+        self.cammpoLst = None
+        self.lRef = None
 
-        
+    def inicializa(self, con_mst, campo_lst, *args):        
+        # *args: nombre_lista_mst, campo_lista, listas
+        self.conMst = con_mst
+        self.campoMst = campo_lst
+        self.campoLst = args[0]
+   
+        #self.currentIndexChanged.connect(            lambda: self.conMst().__setitem__(self.campoMst, self.getValor()))
+
+    def getValor(self):
+        ci = self.model().currentIndex()
+        if ci:
+            return object_session(self.conMst()).merge(self.lista[ci-1])
+        else:
+            return None
+            
+    def setValor(self, valor):
+        if valor != self.getValor():
+            self.blockSignals(True)
+            if valor:
+                self.setCurrentText(valor[self.campoLista])
+            else:
+                self.limpia()
+            self.blockSignals(False)
+     
+    def limpia(self):
+        self.clear()
+
+    def trataSenyal(self, fuente, senyal, *args):
+        # Tratará las señales procedentes del maestro principal
+        logger.info('iflista.trataSenyal ' + str(fuente) + ' - ' + senyal + ' - ' + str(args))
+
+        if senyal == 'mv':
+            self.limpia()
+            for l in args[0]:
+                self.addItem(l[self.campoLst])
+                
+                        
 class ifLineaTabla (object):
     def __init__(self, mst):
         self.maestro = mst
@@ -489,25 +518,7 @@ def nuevoIfCampo(if_widget, tipoIf, conMst, campoMst, *args):
     
     ifCampo = eval(tipoIf+"(parent=if_widget)")
     ifCampo.inicializa(conMst, campoMst, *args)
-    '''
-    elif (tipoIf == 'ifRefExt'):
-        ifCampo = ifRefExt(qtCmp, if_widget.valListas[param[0]], param[1], conMst, campoMst)
-        
-    elif (tipoIf == 'ifListaD'):
-        ifCampo = ifListaD(qtCmp, if_widget.valListas[param[0]], conMst, campoMst)
-                    
-    elif (tipoIf == 'ifListaExt'):
-        ifCampo = ifListaExt(qtCmp, if_widget.valListas[param[0]], param[1], conMst, campoMst)
-
-    elif (tipoIf == 'ifRefListaD'):
-        ifCampo = ifListaExt(qtCmp, if_widget.valListas[param[0]], param[1], conMst, campoMst)
-                              
-    elif (tipoIf == 'ifVerificacion'):
-        ifCampo = ifVerificacion(qtCmp, [getattr(self, cmp) for cmp in param[0]], conMst, campoMst)
-    
-    elif (tipoIf == 'ifTabla'):
-        ifCampo = ifTabla(qtCmp, param[0], conMst, campoMst)            
-    '''    
+  
     return ifCampo 
    
 

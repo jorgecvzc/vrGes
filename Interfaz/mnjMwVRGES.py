@@ -8,7 +8,7 @@ from PyQt5 import QtCore, QtWidgets
 from PyQt5 import uic
 from Interfaz.mnjDgPedidos import ifPedidos
 from Interfaz.ifArticulos import ifArticulos, ifModificadoresArt, ifVariantesArt, ifPosiciones
-from Interfaz.ifTrabajos import ifTrabajos, ifProcesos, ifTareas
+from Interfaz import ifTrabajos
 from Interfaz import ifPersonas
 
 
@@ -24,12 +24,13 @@ class MainWindow(QtWidgets.QMainWindow):
                'actModificadoresArt': (lambda: ifModificadoresArt(self.cm)),
                'actVariantesArt': (lambda: ifVariantesArt(self.cm)),
                'actPosiciones': (lambda: ifPosiciones(self.cm)),
-               'actTareas': (lambda: ifTareas(self.cm)),
-               'actProcesos': (lambda: ifProcesos(self.cm)),
-               'actTrabajos': (lambda: ifTrabajos(self.cm)),
+               'actTareas': (lambda: ifTrabajos.ifTareas(self.cm)),
+               'actProcesos': (lambda: ifTrabajos.ifProcesos(self.cm)),
+               'actTrabajos': (lambda: ifTrabajos.ifTrabajos(self.cm)),
                'actPosiciones': (lambda: ifPosiciones(self.cm)),
                
                'actClientes': (lambda: ifPersonas.ifClientes(self.cm)),
+               'actProcedimientos': (lambda: ifTrabajos.ifProcedimientos(self.cm)),
                'actProveedores': (lambda: ifPersonas.ifProveedores(self.cm)),
                }
         

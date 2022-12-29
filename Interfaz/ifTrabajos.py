@@ -3,7 +3,6 @@ Created on 19 dic. 2018
 
 @author: cortesj
 '''
-from PyQt5 import QtWidgets, uic, QtCore
 from Interfaz.Interfaces import ifMaestro
 
        
@@ -11,7 +10,7 @@ class ifTrabajos(ifMaestro):
     '''
     Clase para el manejo de la interfaz del maestro Proceso
     '''
-    TipoMaestro="Articulos.Articulo"
+    TipoMaestro="Trabajos.Trabajo"
     Interfaz = "wdArticulos"
 
     ListasMst = {
@@ -19,14 +18,14 @@ class ifTrabajos(ifMaestro):
     }       
 
     Campos = {
-        'leRef': ('ifCadena', 'ref'),
-        'leNombre': ('ifCadena', 'nombre'),
-        'leDescripcion': ('ifCadena', 'descripcion'),
-        'leProveedor': ('ifCadenaRef', 'lProveedores', 'id', 'proveedor'),
-        'cbProveedor': ('ifListaRef', 'lProveedores', 'nombre', 'proveedor'),
-        'ptObs': ('ifTexto', 'observaciones'),
-        'chbManufacturado': ('ifVerificacion', ['tbEscandallo'], 'manufacturado'),
-        'leNumVariantes': ('ifCadena', 'numVariantes')
+        'leRef': ('ref'),
+        'leNombre': ('nombre'),
+        'leDescripcion': ('descripcion'),
+        'leProveedor': ('proveedor', 'id', 'lProveedores',),
+        'cbProveedor': ('proveedor', 'nombre', 'lProveedores',),
+        'ptObs': ('observaciones',),
+        'chbManufacturado': ('manufacturado', ['tbEscandallo'],),
+        'leNumVariantes': ('numVariantes',)
     }
 
     BusquedaMaestro = (['ref', 'nombre'], ['ref', 'nombre'])
@@ -45,16 +44,16 @@ class ifProcesos(ifMaestro):
     }   
 
     linTarea = {
-        'Tarea': ('ifRefExt', 'lTareas', 'ref', 'tarea'),
-        'Única': ('ifVerificacion', [], 'unica'),
+        'Tarea': ('ifRefExt', 'tarea', 'ref', 'lTareas', ),
+        'Única': ('ifVerificacion', 'unica', [],),
         'Observaciones': ('ifCadena', 'observaciones'),
     }
 
     Campos = {
-        'leRef': ('ifCadena', 'ref'),
-        'leNombre': ('ifCadena', 'nombre'),
-        'ptObs': ('ifTexto', 'observaciones'),
-        'twTareas': ('ifTabla', linTarea, 'tareas')
+        'leRef': ('ref',),
+        'leNombre': ('nombre',),
+        'ptObs': ('observaciones',),
+        'twTareas': ('tareas', linTarea,)
     }
     
     BusquedaMaestro = (['ref', 'nombre'], ['ref', 'nombre'])    
@@ -68,11 +67,29 @@ class ifTareas(ifMaestro):
     Interfaz = "Trabajos/wdTareas"
 
     Campos = {
-        'leRef': ('ifCadena', 'ref'),
-        'leNombre': ('ifCadena', 'nombre'),
-        'leDescripcion': ('ifCadena', 'descripcion'),
+        'leRef': ('ref',),
+        'leNombre': ('nombre',),
+        'leDescripcion': ('descripcion',),
     }
 
-    BusquedaMaestro = (['ref', 'nombre'], ['ref', 'nombre'])    
+    BusquedaMaestro = (['ref', 'nombre'], ['ref', 'nombre'])
 
 
+class ifProcedimientos(ifMaestro):
+    '''
+    Clase para el manejo de la interfaz del maestro Proceso
+    '''
+    TipoMaestro="Trabajos.Procedimiento"
+    Interfaz = "Trabajos/wdProcedimientos"
+
+    ListasMst = {
+        'lClientes': ('Personas.Cliente', ['ref', 'nombre'])
+    }       
+
+    Campos = {
+        'reCliRef': ('cliente', 'ref', None),
+        'ceCliNombre': ('cliente', 'nombre'),
+        'cdNombre': ('nombre',),
+    }
+
+    BusquedaMaestro = (['nombre'], ['nombre'])

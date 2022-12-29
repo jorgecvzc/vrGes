@@ -116,18 +116,28 @@
      <property name="title">
       <string>Artículos</string>
      </property>
+     <widget class="QMenu" name="menuTrabajos">
+      <property name="title">
+       <string>Trabajos</string>
+      </property>
+      <addaction name="actTrabajos"/>
+      <addaction name="actProcesos"/>
+      <addaction name="actTareas"/>
+     </widget>
      <addaction name="actArticulos"/>
-     <addaction name="actModificadoresArt"/>
      <addaction name="actVariantesArt"/>
+     <addaction name="actModificadoresArt"/>
      <addaction name="actPosiciones"/>
+     <addaction name="separator"/>
+     <addaction name="menuTrabajos"/>
     </widget>
     <addaction name="menuArt_culos"/>
+    <addaction name="separator"/>
     <addaction name="actProveedores"/>
     <addaction name="actClientes"/>
+    <addaction name="actProcedimientos"/>
+    <addaction name="separator"/>
     <addaction name="actPedidos"/>
-    <addaction name="actTrabajos"/>
-    <addaction name="actProcesos"/>
-    <addaction name="actTareas"/>
     <addaction name="actCerrarVentana"/>
    </widget>
    <widget class="QMenu" name="mnuNavegar">
@@ -293,6 +303,11 @@
   <action name="actClientes">
    <property name="text">
     <string>Clientes</string>
+   </property>
+  </action>
+  <action name="actProcedimientos">
+   <property name="text">
+    <string>Procedimientos</string>
    </property>
   </action>
  </widget>

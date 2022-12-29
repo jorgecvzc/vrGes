@@ -33,11 +33,7 @@
       </widget>
      </item>
      <item>
-      <widget class="ifTabla" name="twTareas">
-       <property name="sizeAdjustPolicy">
-        <enum>QAbstractScrollArea::AdjustToContents</enum>
-       </property>
-      </widget>
+      <widget class="QListWidget" name="listWidget"/>
      </item>
     </layout>
    </item>
@@ -61,38 +57,7 @@
      <property name="topMargin">
       <number>5</number>
      </property>
-     <item row="0" column="0">
-      <widget class="QLabel" name="label">
-       <property name="font">
-        <font>
-         <family>Zekton</family>
-         <pointsize>12</pointsize>
-        </font>
-       </property>
-       <property name="text">
-        <string>Referencia:</string>
-       </property>
-       <property name="buddy">
-        <cstring>leRef</cstring>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="1">
-      <widget class="ifCadena" name="leRef">
-       <property name="maximumSize">
-        <size>
-         <width>200</width>
-         <height>16777215</height>
-        </size>
-       </property>
-       <property name="font">
-        <font>
-         <pointsize>12</pointsize>
-        </font>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="0">
+     <item row="2" column="0">
       <widget class="QLabel" name="label_3">
        <property name="font">
         <font>
@@ -101,15 +66,15 @@
         </font>
        </property>
        <property name="text">
-        <string>Nombre: </string>
+        <string>Nombre:</string>
        </property>
        <property name="buddy">
-        <cstring>leNombre</cstring>
+        <cstring>cdNombre</cstring>
        </property>
       </widget>
      </item>
-     <item row="1" column="1">
-      <widget class="ifCadena" name="leNombre">
+     <item row="2" column="1">
+      <widget class="ifCadena" name="cdNombre">
        <property name="maximumSize">
         <size>
          <width>800</width>
@@ -123,7 +88,7 @@
        </property>
       </widget>
      </item>
-     <item row="2" column="0">
+     <item row="3" column="0">
       <widget class="QLabel" name="label_2">
        <property name="font">
         <font>
@@ -136,7 +101,7 @@
        </property>
       </widget>
      </item>
-     <item row="2" column="1">
+     <item row="3" column="1">
       <widget class="ifTexto" name="ptObs">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
@@ -149,6 +114,50 @@
          <width>16777215</width>
          <height>85</height>
         </size>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="1">
+      <layout class="QHBoxLayout" name="horizontalLayout">
+       <item>
+        <widget class="ifRefExtLista" name="reCliRef">
+         <property name="maximumSize">
+          <size>
+           <width>100</width>
+           <height>16777215</height>
+          </size>
+         </property>
+         <property name="font">
+          <font>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="ifCadenaExt" name="ceCliNombre">
+         <property name="font">
+          <font>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item row="1" column="0">
+      <widget class="QLabel" name="label">
+       <property name="font">
+        <font>
+         <family>Zekton</family>
+         <pointsize>12</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>Cliente:</string>
+       </property>
+       <property name="buddy">
+        <cstring>reCliRef</cstring>
        </property>
       </widget>
      </item>
@@ -168,14 +177,18 @@
    <header>Interfaz/ifCampos.h</header>
   </customwidget>
   <customwidget>
-   <class>ifTabla</class>
-   <extends>QTableWidget</extends>
-   <header>Interfaz/ifCampos.h</header>
+   <class>ifRefExtLista</class>
+   <extends>QLineEdit</extends>
+   <header>Interfaz/ifCampos</header>
+  </customwidget>
+  <customwidget>
+   <class>ifCadenaExt</class>
+   <extends>QLineEdit</extends>
+   <header>Interfaz/ifCampos</header>
   </customwidget>
  </customwidgets>
  <tabstops>
-  <tabstop>leRef</tabstop>
-  <tabstop>leNombre</tabstop>
+  <tabstop>cdNombre</tabstop>
  </tabstops>
  <resources/>
  <connections/>

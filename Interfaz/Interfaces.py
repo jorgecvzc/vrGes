@@ -17,6 +17,21 @@ from Señales import TunelSenyal
 import log
 logger = log.get_logger(__name__)
 
+
+'''
+CLASE PARA SUBVENTANAS CON ACCESO A UN MAESTRO
+'''
+class ifDgMst(QtWidgets.QDialog):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        uic.loadUi('Interfaz/Diseño/dgIfMst.ui', self)    
+        self.pbAceptar.clicked.connect(self.aceptar)
+        
+    def aceptar (self):
+        print(self.dw.widget().maestro)
+        # self.dw.almacena()
+        self.close()
+
 '''
 CLASE PARA MANEJAR EL DIALOGO DE BUSQUEDA DE MAESTRO
 '''
@@ -69,6 +84,7 @@ class ifDgMstBusqueda(QtWidgets.QDialog):
         self.pbBuscar.clicked.connect(self.buscar)
         self.qtvResultados.doubleClicked.connect(self.close)
    
+        # Carga la consulta para la búsqueda de maestros
         self.consulta = self.mnj.generaConsulta(tipo_maestro, campos_busqueda, campos_lista)
         
     '''
@@ -106,6 +122,7 @@ class ifDgMstBusqueda(QtWidgets.QDialog):
                     camposSel.append(dato)
         return camposSel 
     
+    
 '''
 CLASE DE INTERFAZ DE MAESTRO
 '''
@@ -117,6 +134,7 @@ class ifMaestro(QtWidgets.QWidget):
     Interfaz = ''
     ListasMst = {}
     Campos = {}
+    Botones = {}
     BusquedaMaestro = ()
     keyPressed = QtCore.pyqtSignal(int)    
     
@@ -137,7 +155,7 @@ class ifMaestro(QtWidgets.QWidget):
         for lista, caract in self.ListasMst.items():
             self.valListas[lista] = self.mnjListas.cargaLista(
                                         tipo=caract[0], campos_lista=caract[1], orden=caract[1][0]
-                                        )                                    
+                                        )
 
         # Se llama al constructor de la SuperClase Widget
         super().__init__(*args, **kwargs)
@@ -147,13 +165,17 @@ class ifMaestro(QtWidgets.QWidget):
 
         # Se crean los campos de interfaz
         for campoIf, campoConf in self.Campos.items():
-            campoMst = campoConf[-1]
             ifCampo = self.agregaIfCampo(campoIf, campoConf)
-            if not campoMst in self.cmpEditables:
-                self.cmpEditables[campoMst] = [ifCampo]
+            if not ifCampo.campoMst in self.cmpEditables:
+                self.cmpEditables[ifCampo.campoMst] = [ifCampo]
             else:
-                self.cmpEditables[campoMst].append(ifCampo)
-        # campo_lista
+                self.cmpEditables[ifCampo.campoMst].append(ifCampo)
+        
+        # Asigna los procedimeintos de los botones si los hubiera
+        for b in self.Botones.keys():
+            c = self.Botones[b][0](self.cuinf)
+            getattr(self, b).clicked.connect(lambda: self.abrirIfMaestro(c))
+            
         # Asigna atajos de teclado y comandos correspondientes
         self.shortcut_open = QShortcut(QKeySequence('Ctrl+R'), self)
         self.shortcut_open.activated.connect(lambda: self.procesaAtajo('BC')) 
@@ -198,8 +220,9 @@ class ifMaestro(QtWidgets.QWidget):
     def agregaIfCampo(self, campo, param):
         # Se cargan los ifCampos y sus desencadenadores al actualizarlos
         qtCamp = getattr(self, campo)
-        campoMst = param[-1]
-        qtCamp.inicializa(self.conMst, campoMst, *param[1:-1], self.valListas)
+        campoMst = param[0]
+        orden = qtCamp.inicializa(self.conMst, campoMst, *param[1:], self.valListas)
+        if orden: print(orden)
         return qtCamp
        
     def vaciaIfCampos(self, dic=None):
@@ -284,11 +307,22 @@ class ifMaestro(QtWidgets.QWidget):
         if buttonReply == QMessageBox.Yes:
             if self.mnj.borra(self.maestro):
                 self.vaciaIfCampos()    
-    
+
+    def abrirIfMaestro(self, ui):
+        # Si hay definida una busqueda para el maestro se abre
+        dmst = ifDgMst(self)
+        dmst.dw.setWidget(ui)
+        dmst.exec()
+
+        campoB = ui.maestro['nombre']
+        if campoB:
+            print(campoB)
+ 
     def abrirBusquedaMaestro(self):
         # Si hay definida una busqueda para el maestro se abre
         if self.BusquedaMaestro and self.guardarSiCambios():
             ui = ifDgMstBusqueda(self.cuinf, self.TipoMaestro, self.BusquedaMaestro[0], self.BusquedaMaestro[1])
+            ui.maestro['cliente'] = self.maestro.getId() 
             if ui:
                 ui.exec()
             campoB = ui.campoFilasSelec('id')

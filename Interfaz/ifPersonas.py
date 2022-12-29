@@ -5,24 +5,7 @@ Created on 19 dic. 2018
 '''
 from PyQt5 import QtWidgets, uic, QtCore
 from Interfaz.Interfaces import ifMaestro
-
-class ifClientes(ifMaestro):
-    '''
-    Clase para el manejo de la interfaz de la clase ModificadoresArt
-    '''
-    TipoMaestro = "Personas.Cliente"
-    Interfaz = "Personas/wdClientes"
-    
-    ListasMst = {
-        'lProcedimientosCli': ('Trabajos.Procedimiento', ['nombre'])
-    }   
-    Campos = {
-        'leRef': ('ifCadena', 'ref'),
-        'leNombre': ('ifCadena', 'nombre'),
-        'lvProcedimientos': ('ifListaExt', 'lProcedimientosCli', 'nombre', 'procedimientos')
-    }    
-    BusquedaMaestro = (['ref', 'nombre'], ['ref', 'nombre'])
-
+from Interfaz.ifTrabajos import ifProcedimientos
 
 class ifProveedores(ifMaestro):
     '''
@@ -36,3 +19,26 @@ class ifProveedores(ifMaestro):
         'leNombre': ('ifCadena', 'nombre'),
     }  
     BusquedaMaestro = (['ref', 'nombre'], ['ref', 'nombre'])
+
+
+class ifClientes(ifMaestro):
+    '''
+    Clase para el manejo de la interfaz de la clase ModificadoresArt
+    '''
+    TipoMaestro = "Personas.Cliente"
+    Interfaz = "Personas/wdClientes"
+    
+    ListasMst = {
+        'lProcedimientosCli': ('Trabajos.Procedimiento', ['nombre'])
+    }   
+    Campos = {
+        'leRef': ('ref',),
+        'leNombre': ('nombre',),
+        'lwProcedimientos': ('procedimientos', 'nombre',)
+    }    
+    BusquedaMaestro = (['ref', 'nombre'], ['ref', 'nombre'])
+
+    Botones = {
+        'pbAgregaProc': (ifProcedimientos,)
+        }
+

@@ -28,29 +28,7 @@ class ifArticulos(ifMaestro):
     }
 
     BusquedaMaestro = (['ref', 'nombre'], ['ref', 'nombre'])    
-    '''
-        self.nuevoIfCampo('manufacturado', 'ifVerificacion', self.chbManufacturado, [self.tbEscandallo])
-
-        mstProc = self.mnj.nuevoMaestro('Proceso')
-        consProc = self.mnj.consultaMaestro(mstProc, None, ['id', 'nombre'], ["nombre"])
-        self.nuevoIfCampo('escandallo->proceso', 'ifListaD', self.cbProcesos, list(consProc['id']), list(consProc['nombre']))
-
-        mstVar = self.mnj.nuevoMaestro('VarianteArt')
-        consVar = self.mnj.consultaMaestro(mstVar, None, ['id', 'ref', 'nombre'], ["nombre"])
-        self.nuevoIfCampo('numVariantes', 'ifCadena', self.leNumVariantes)        
-        self.nuevoIfCampo('variante1', 'ifRefListaD', self.leVar1, self.cbVar1, list(consVar['id']), list(consVar['ref']), list(consVar['nombre']))        
-        self.nuevoIfCampo('variante2', 'ifRefListaD', self.leVar2, self.cbVar2, list(consVar['id']), list(consVar['ref']), list(consVar['nombre']))  
-        self.nuevoIfCampo('variante3', 'ifRefListaD', self.leVar3, self.cbVar3, list(consVar['id']), list(consVar['ref']), list(consVar['nombre']))  
-                               
-        twLineasCols = {'pieza':'Pieza','ref':'Ref','matRef':'Ref Material','matNombre':'Nombre', 'ancho':'Ancho', 'largo':'Largo','area':'Area'}
-        self.nuevoIfCampo('escandallo->despiece', 'ifTabla', self.twDespiece, twLineasCols)
-        
-        twLineasTareas = {'refTarea':'Ref','nomTarea':'Tarea','tiempo':'Tiempo', 'coste':'Coste'}
-        self.nuevoIfCampo('escandallo->procesoTareas', 'ifTabla', self.twTareas, twLineasTareas)        
-                
-    def trataSenyal(self, fuente, senyal, *args):
-        super().trataSenyal(fuente, senyal, *args)
-    '''        
+     
 
 class ifPosiciones(ifMaestro):
     '''
@@ -60,8 +38,8 @@ class ifPosiciones(ifMaestro):
     Interfaz = "Articulos/wdPosiciones"
 
     Campos = {
-        'leRef': ('ifCadena', 'ref'),
-        'leNombre': ('ifCadena', 'nombre'),
+        'leRef': ('ref',),
+        'leNombre': ('nombre',),
     }
     
 
@@ -78,9 +56,9 @@ class ifVariantesArt(ifMaestro):
     }
     
     Campos = {
-        'leRef': ('ifCadena', 'ref'),
-        'leNombre': ('ifCadena', 'nombre'),
-        'twModificadores': ('ifTabla', linModificador, 'modificadores')
+        'leRef': ('ref',),
+        'leNombre': ('nombre',),
+        'twModificadores': ('modificadores', linModificador,)
     }
 
     BusquedaMaestro = (['ref', 'nombre'], ['ref', 'nombre'])
@@ -98,10 +76,10 @@ class ifModificadoresArt(ifMaestro):
     }   
     
     Campos = {
-        'leRef': ('ifCadena', 'ref'),
-        'leNombre': ('ifCadena', 'nombre'),
-        'leVariante': ('ifRefExt', 'lVariantesArt', 'ref', 'variante'),
-        'cbVariante': ('ifDesplegableExt', 'lVariantesArt', 'nombre', 'variante')
+        'leRef': ('ref',),
+        'leNombre': ('nombre',),
+        'leVariante': ('variante', 'ref', 'lVariantesArt',),
+        'cbVariante': ('variante', 'nombre', 'lVariantesArt')
     }    
 
     BusquedaMaestro = (['ref', 'nombre'], ['ref', 'nombre'])

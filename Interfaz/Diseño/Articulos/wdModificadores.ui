@@ -63,7 +63,7 @@
        <enum>QLayout::SetDefaultConstraint</enum>
       </property>
       <item>
-       <widget class="ifRefExt" name="leVariante">
+       <widget class="ifRefExtLista" name="leVariante">
         <property name="maximumSize">
          <size>
           <width>100</width>
@@ -190,7 +190,7 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>ifRefExt</class>
+   <class>ifRefExtLista</class>
    <extends>QLineEdit</extends>
    <header>Interfaz/ifCampos.h</header>
   </customwidget>
