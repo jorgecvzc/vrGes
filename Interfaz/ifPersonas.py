@@ -3,8 +3,8 @@ Created on 19 dic. 2018
 
 @author: cortesj
 '''
-from PyQt5 import QtWidgets, uic, QtCore
 from Interfaz.Interfaces import ifMaestro
+from Interfaz.Campos import acConf, cConf
 from Interfaz.ifTrabajos import ifProcedimientos
 
 class ifProveedores(ifMaestro):
@@ -15,8 +15,8 @@ class ifProveedores(ifMaestro):
     Interfaz = "Personas/wdProveedores"
     
     Campos = {
-        'leRef': ('ifCadena', 'ref'),
-        'leNombre': ('ifCadena', 'nombre'),
+        'leRef': cConf('ifCadena', 'ref'),
+        'leNombre': cConf('ifCadena', 'nombre'),
     }  
     BusquedaMaestro = (['ref', 'nombre'], ['ref', 'nombre'])
 
@@ -30,15 +30,15 @@ class ifClientes(ifMaestro):
     
     ListasMst = {
         'lProcedimientosCli': ('Trabajos.Procedimiento', ['nombre'])
-    }   
+    }
+
     Campos = {
-        'leRef': ('ref',),
-        'leNombre': ('nombre',),
-        'lwProcedimientos': ('procedimientos', 'nombre',)
-    }    
-    BusquedaMaestro = (['ref', 'nombre'], ['ref', 'nombre'])
+        'leRef': cConf('ref'),
+        'leNombre': cConf('nombre',),
+        'lwProcedimientos': cConf('procedimientos', 'nombre', acciones=acConf(ifProcedimientos, ifMaestro.abrirIfMaestro))
+    }
 
     Botones = {
-        'pbAgregaProc': (ifProcedimientos,)
+        'pbAgregaProc': (ifProcedimientos, 'lwProcedimientos')
         }
-
+    BusquedaMaestro = (['ref', 'nombre'], ['ref', 'nombre'])

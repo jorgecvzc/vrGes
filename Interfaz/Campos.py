@@ -1,7 +1,7 @@
 from sqlalchemy import select
 from sqlalchemy.orm import object_session
 
-from PyQt5 import QtCore, QtWidgets, QtGui
+from PyQt5 import QtCore, QtWidgets
 from PyQt5.Qt import (
     QLineEdit, 
     QPlainTextEdit, 
@@ -14,6 +14,20 @@ from PyQt5.QtWidgets import QCompleter
 
 import log
 logger = log.get_logger(__name__)
+
+'''
+CLASES DE CONFIGURACIÓN DE LAS UNIONES ENTRE INTERFAZ Y CAMPOS DE MAESTRO
+'''
+class cConf(object):
+    def __init__(self, *args, **kwargs):
+        self.conf = args
+        self.params = kwargs
+
+class acConf(object):
+    def __init__(self, *args, **kwargs):
+        self.conf = args
+        self.params = kwargs
+
 
 '''
 CLASES DE UNION ENTRE INTERFAZ Y CAMPOS DE UN MAESTRO
@@ -190,9 +204,6 @@ class ifRefExtLista(QLineEdit, ifCampo):
         self.setCompleter(qCompleter)
 
         self.conMst = con_mst        
-        
-        # El campo inicializa puede devolver unas siglas que indicarán una orden para la ingerfaz
-        return 'av'
     
     def getValor(self):
         valor = self.text()
@@ -288,9 +299,9 @@ class ifLista (ifCampo, QListWidget):
         #self.currentIndexChanged.connect(            lambda: self.conMst().__setitem__(self.campoMst, self.getValor()))
 
     def getValor(self):
-        ci = self.model().currentIndex()
-        if ci:
-            return object_session(self.conMst()).merge(self.lista[ci-1])
+        ci = self.currentRow()
+        if ci >= 0:
+            return self.conMst()[self.campoMst][ci]
         else:
             return None
             

@@ -102,7 +102,7 @@
   <customwidget>
    <class>ifCadena</class>
    <extends>QLineEdit</extends>
-   <header>Interfaz/ifCampos.h</header>
+   <header>Interfaz/Campos.h</header>
   </customwidget>
  </customwidgets>
  <tabstops>

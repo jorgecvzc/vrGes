@@ -169,22 +169,22 @@
   <customwidget>
    <class>ifCadena</class>
    <extends>QLineEdit</extends>
-   <header>Interfaz/ifCampos.h</header>
+   <header>Interfaz/Campos.h</header>
   </customwidget>
   <customwidget>
    <class>ifTexto</class>
    <extends>QPlainTextEdit</extends>
-   <header>Interfaz/ifCampos.h</header>
+   <header>Interfaz/Campos.h</header>
   </customwidget>
   <customwidget>
    <class>ifRefExtLista</class>
    <extends>QLineEdit</extends>
-   <header>Interfaz/ifCampos</header>
+   <header>Interfaz/Campos.h</header>
   </customwidget>
   <customwidget>
    <class>ifCadenaExt</class>
    <extends>QLineEdit</extends>
-   <header>Interfaz/ifCampos</header>
+   <header>Interfaz/Campos.h</header>
   </customwidget>
  </customwidgets>
  <tabstops>

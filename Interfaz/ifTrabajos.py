@@ -4,7 +4,7 @@ Created on 19 dic. 2018
 @author: cortesj
 '''
 from Interfaz.Interfaces import ifMaestro
-
+from Interfaz.Campos import cConf
        
 class ifTrabajos(ifMaestro):
     '''
@@ -18,14 +18,14 @@ class ifTrabajos(ifMaestro):
     }       
 
     Campos = {
-        'leRef': ('ref'),
-        'leNombre': ('nombre'),
-        'leDescripcion': ('descripcion'),
-        'leProveedor': ('proveedor', 'id', 'lProveedores',),
-        'cbProveedor': ('proveedor', 'nombre', 'lProveedores',),
-        'ptObs': ('observaciones',),
-        'chbManufacturado': ('manufacturado', ['tbEscandallo'],),
-        'leNumVariantes': ('numVariantes',)
+        'leRef': cConf('ref'),
+        'leNombre': cConf('nombre'),
+        'leDescripcion': cConf('descripcion'),
+        'leProveedor': cConf('proveedor', 'id', 'lProveedores'),
+        'cbProveedor': cConf('proveedor', 'nombre', 'lProveedores'),
+        'ptObs': cConf('observaciones',),
+        'chbManufacturado': cConf('manufacturado', ['tbEscandallo']),
+        'leNumVariantes': cConf('numVariantes')
     }
 
     BusquedaMaestro = (['ref', 'nombre'], ['ref', 'nombre'])
@@ -50,10 +50,10 @@ class ifProcesos(ifMaestro):
     }
 
     Campos = {
-        'leRef': ('ref',),
-        'leNombre': ('nombre',),
-        'ptObs': ('observaciones',),
-        'twTareas': ('tareas', linTarea,)
+        'leRef': cConf('ref'),
+        'leNombre': cConf('nombre'),
+        'ptObs': cConf('observaciones'),
+        'twTareas': cConf('tareas', linTarea,)
     }
     
     BusquedaMaestro = (['ref', 'nombre'], ['ref', 'nombre'])    
@@ -67,9 +67,9 @@ class ifTareas(ifMaestro):
     Interfaz = "Trabajos/wdTareas"
 
     Campos = {
-        'leRef': ('ref',),
-        'leNombre': ('nombre',),
-        'leDescripcion': ('descripcion',),
+        'leRef': cConf('ref'),
+        'leNombre': cConf('nombre'),
+        'leDescripcion': cConf('descripcion'),
     }
 
     BusquedaMaestro = (['ref', 'nombre'], ['ref', 'nombre'])
@@ -87,9 +87,9 @@ class ifProcedimientos(ifMaestro):
     }       
 
     Campos = {
-        'reCliRef': ('cliente', 'ref', None),
-        'ceCliNombre': ('cliente', 'nombre'),
-        'cdNombre': ('nombre',),
+        'reCliRef': cConf('cliente', 'ref', None),
+        'ceCliNombre': cConf('cliente', 'nombre'),
+        'cdNombre': cConf('nombre'),
     }
 
     BusquedaMaestro = (['nombre'], ['nombre'])

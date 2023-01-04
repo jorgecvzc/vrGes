@@ -5,12 +5,11 @@ Created on 4 mar. 2019
 '''
 import sys
 
-from sqlalchemy.orm import object_session
 from PyQt5 import uic, QtWidgets, QtCore
 from PyQt5.QtGui import QKeySequence
-from PyQt5.QtWidgets import QMessageBox, QShortcut, QCompleter
+from PyQt5.QtWidgets import QMessageBox, QShortcut
 
-from .ifCampos import ifTabla
+from Interfaz.Campos import ifTabla
 
 from Señales import TunelSenyal
 
@@ -21,16 +20,23 @@ logger = log.get_logger(__name__)
 '''
 CLASE PARA SUBVENTANAS CON ACCESO A UN MAESTRO
 '''
-class ifDgMst(QtWidgets.QDialog):
+class ifDgMst (QtWidgets.QDialog):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         uic.loadUi('Interfaz/Diseño/dgIfMst.ui', self)    
         self.pbAceptar.clicked.connect(self.aceptar)
+        self.pbCancelar.clicked.connect(self.cancelar)
         
-    def aceptar (self):
-        print(self.dw.widget().maestro)
-        # self.dw.almacena()
-        self.close()
+    def aceptar(self):
+        guardado = self.dw.widget().guardarSiCambios()
+        if guardado == 2:
+            self.accept()
+        elif guardado == 1:
+            self.reject()
+            
+    def cancelar(self):
+        self.reject()
+
 
 '''
 CLASE PARA MANEJAR EL DIALOGO DE BUSQUEDA DE MAESTRO
@@ -162,19 +168,20 @@ class ifMaestro(QtWidgets.QWidget):
         
         # Carga la interfaz gráfica
         uic.loadUi('Interfaz/Diseño/'+self.Interfaz+'.ui', self)
-
+        
         # Se crean los campos de interfaz
         for campoIf, campoConf in self.Campos.items():
-            ifCampo = self.agregaIfCampo(campoIf, campoConf)
+            ifCampo = self.agregaIfCampo(campoIf, campoConf.conf)
             if not ifCampo.campoMst in self.cmpEditables:
                 self.cmpEditables[ifCampo.campoMst] = [ifCampo]
             else:
                 self.cmpEditables[ifCampo.campoMst].append(ifCampo)
-        
+            
         # Asigna los procedimeintos de los botones si los hubiera
         for b in self.Botones.keys():
-            c = self.Botones[b][0](self.cuinf)
-            getattr(self, b).clicked.connect(lambda: self.abrirIfMaestro(c))
+            ifClassMst = self.Botones[b][0]
+            cmpMst = getattr(self, self.Botones[b][1])
+            getattr(self, b).clicked.connect(lambda: self.abrirIfMaestro(ifClassMst, cmpMst))
             
         # Asigna atajos de teclado y comandos correspondientes
         self.shortcut_open = QShortcut(QKeySequence('Ctrl+R'), self)
@@ -255,6 +262,7 @@ class ifMaestro(QtWidgets.QWidget):
                 return 0
             elif buttonReply == QMessageBox.Yes:
                 self.mnj.almacena()
+                return 2
         return 1            
     
     '''
@@ -265,7 +273,16 @@ class ifMaestro(QtWidgets.QWidget):
         # Carga el primer maestro en la interfaz
         if not self.cargaMaestro('pri'):
             self.nuevo()
-                
+
+    # Se asigna un maestro directameten
+    def setMaestro(self, mst):
+        if mst != self.maestro:
+            self.logImp()
+            self.mnj.descarta(self.maestro)
+            valor = self.mnj.agregaExterno(mst)
+            self.maestro = valor
+            self.cargaIfCampos()
+            
     # Fucniones de navegación sobre los maestros almacenados
     def cargaMaestro(self, mov):
         if self.guardarSiCambios():
@@ -308,17 +325,16 @@ class ifMaestro(QtWidgets.QWidget):
             if self.mnj.borra(self.maestro):
                 self.vaciaIfCampos()    
 
-    def abrirIfMaestro(self, ui):
-        # Si hay definida una busqueda para el maestro se abre
+    def abrirIfMaestro(self, ifClassMst, cmpMst):
+        # Se carga el ifUinf de edicion
+        ifMst = ifClassMst(self.cuinf)
+        ifMst.setMaestro(cmpMst.getValor())
+        # Se añade el uinf a un diálogo
         dmst = ifDgMst(self)
-        dmst.dw.setWidget(ui)
-        ui.maestro['cliente'] = self.maestro.getId()         
-        dmst.exec()
-
-        campoB = ui.maestro['nombre']
-        if campoB:
-            print(campoB)
- 
+        dmst.dw.setWidget(ifMst)
+        if dmst.exec():
+            print (ifMst.maestro['nombre'])
+        
     def abrirBusquedaMaestro(self):
         # Si hay definida una busqueda para el maestro se abre
         if self.BusquedaMaestro and self.guardarSiCambios():
@@ -361,14 +377,11 @@ class ifMaestro(QtWidgets.QWidget):
                     ifc.trataSenyal(fuente[1:], senyal, *args)
      
         except:
-            msg = QtWidgets.QMessageBox()
-            msg.setIcon(QtWidgets.QMessageBox.Information)
-            msg.setWindowTitle("Mensaje Error. Interfaces->ifMaestro->trataSenyal")
-            msg.setText("Error inesperado: " + str(sys.exc_info()[0]))
-            msg.setInformativeText(str(sys.exc_info()[1]))
-            msg.setStandardButtons(QtWidgets.QMessageBox.Ok)
-            msg.exec_()
-                        
+            error_dialog = QtWidgets.QErrorMessage(self)
+            error_dialog.setWindowModality(QtCore.Qt.WindowModal)
+            error_dialog.showMessage("Error inesperado: " + 
+                                     str(sys.exc_info()[0]) +'\n' + 
+                                     str(sys.exc_info()[1]))                        
 
     '''
     FUNCIONES DE LOG PARA LA VERIFICACIÓN DEL CÓDIGO DURANTE LA PROGRAMACIÓN

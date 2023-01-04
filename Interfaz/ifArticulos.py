@@ -5,6 +5,7 @@ Created on 19 dic. 2018
 '''
 from PyQt5 import QtWidgets, uic, QtCore
 from Interfaz.Interfaces import ifMaestro
+from Interfaz.Campos import cConf
 
 class ifArticulos(ifMaestro):
     '''
@@ -38,8 +39,8 @@ class ifPosiciones(ifMaestro):
     Interfaz = "Articulos/wdPosiciones"
 
     Campos = {
-        'leRef': ('ref',),
-        'leNombre': ('nombre',),
+        'leRef': cConf('ref'),
+        'leNombre': cConf('nombre'),
     }
     
 
@@ -56,9 +57,9 @@ class ifVariantesArt(ifMaestro):
     }
     
     Campos = {
-        'leRef': ('ref',),
-        'leNombre': ('nombre',),
-        'twModificadores': ('modificadores', linModificador,)
+        'leRef': cConf('ref'),
+        'leNombre': cConf('nombre'),
+        'twModificadores': cConf('modificadores', linModificador,)
     }
 
     BusquedaMaestro = (['ref', 'nombre'], ['ref', 'nombre'])
@@ -76,10 +77,10 @@ class ifModificadoresArt(ifMaestro):
     }   
     
     Campos = {
-        'leRef': ('ref',),
-        'leNombre': ('nombre',),
-        'leVariante': ('variante', 'ref', 'lVariantesArt',),
-        'cbVariante': ('variante', 'nombre', 'lVariantesArt')
+        'leRef': cConf('ref'),
+        'leNombre': cConf('nombre'),
+        'leVariante': cConf('variante', 'ref', 'lVariantesArt'),
+        'cbVariante': cConf('variante', 'nombre', 'lVariantesArt')
     }    
 
     BusquedaMaestro = (['ref', 'nombre'], ['ref', 'nombre'])

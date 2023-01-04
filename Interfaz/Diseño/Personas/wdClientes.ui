@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>900</width>
-    <height>539</height>
+    <height>532</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -135,12 +135,12 @@
   <customwidget>
    <class>ifCadena</class>
    <extends>QLineEdit</extends>
-   <header>Interfaz/ifCampos.h</header>
+   <header>Interfaz/Campos.h</header>
   </customwidget>
   <customwidget>
    <class>ifLista</class>
    <extends>QListWidget</extends>
-   <header>Interfaz/ifCampos.h</header>
+   <header>Interfaz/Campos.h</header>
   </customwidget>
  </customwidgets>
  <resources/>
