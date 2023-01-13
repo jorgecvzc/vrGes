@@ -15,7 +15,7 @@ from Utils import BDMantenimiento
 import log
 #log.logging.DEBUG
 #log.logging.ERROR
-log.ini_logger(log.LOGGER_APP_NAME, log.logging.DEBUG) 
+log.ini_logger(log.LOGGER_APP_NAME, log.logging.ERROR) 
 log.ini_logger('vrGes.Sec', log.logging.ERROR)
 
 class Gestion(object):

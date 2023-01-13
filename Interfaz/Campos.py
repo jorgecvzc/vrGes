@@ -12,23 +12,36 @@ from PyQt5.Qt import (
     )
 from PyQt5.QtWidgets import QCompleter
 
+from Interfaz.Dialogos import ifDgMst
+
 import log
 logger = log.get_logger(__name__)
 
 '''
 CLASES DE CONFIGURACIÓN DE LAS UNIONES ENTRE INTERFAZ Y CAMPOS DE MAESTRO
 '''
+class acConf(object):
+    # Configuración de acciones
+    def __init__(self, func, *args, **kwargs):
+        self.func = func
+        self.params = args
+        self.paramsDic = kwargs
+        
+    def __str__(self):
+        return 'Objeto acConf (Función: %s, Número parámetros: %s, %s)' % \
+              (str(self.func), str(len(self.params)), str(len(self.paramsDic)))
+        
 class cConf(object):
     def __init__(self, *args, **kwargs):
-        self.conf = args
+        self.campo = args[0]
+        self.conf = args[1:]
+        self.acciones = kwargs.pop('accion', None)
+        if not self.acciones:
+            self.acciones = kwargs.pop('acciones', [])
+        else:
+            self.acciones = [self.acciones]
         self.params = kwargs
-
-class acConf(object):
-    def __init__(self, *args, **kwargs):
-        self.conf = args
-        self.params = kwargs
-
-
+        
 '''
 CLASES DE UNION ENTRE INTERFAZ Y CAMPOS DE UN MAESTRO
 '''
@@ -37,9 +50,24 @@ class ifCampo(object):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.bloqueado = False
-        self.conMst = None
         self.campoMst = None
-        
+  
+    def inicializa(self, c_conf):
+        self.conf = c_conf
+        self.campoMst = c_conf.campo
+        self.acciones = c_conf.acciones
+        self.cargaAccionesExtra()
+          
+    def cargaAccionesExtra(self):
+        for acc in self.conf.acciones:
+            args = acc.params
+            kwargs = acc.paramsDic
+            func = getattr(self, acc.func)
+            self.itemDoubleClicked.connect(lambda: func(*args, **kwargs))
+    
+    def conMst(self):
+        return self.parent().maestro            
+          
     def trataSenyal(self, fuente, senyal, *args):
         # Tratará las señales procedentes del maestro principal
         logger.info('ifCampo['+self.campoMst+'].trataSenyal ' + str(fuente) + ' - ' + senyal + ' - ' + str(args))
@@ -48,7 +76,7 @@ class ifCampo(object):
         if (len(fuente) == 1):
             self.setValor(args[0])
         else:
-            self[fuente[1]].trataSenyal(fuente[1:], senyal, args)        
+            self[fuente[1]].trataSenyal(fuente[1:], senyal, args)   
 
     
 class ifCadena(QLineEdit, ifCampo):
@@ -59,10 +87,9 @@ class ifCadena(QLineEdit, ifCampo):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
  
-    def inicializa(self, con_mst, campo_mst, *args):
-        self.conMst = con_mst
-        self.campoMst = campo_mst  
-        self.editingFinished.connect(lambda: self.conMst().__setitem__(self.campoMst, self.getValor())) 
+    def inicializa(self, c_conf):
+        super().inicializa(c_conf)
+        self.editingFinished.connect(lambda: self.parent().maestro.__setitem__(self.campoMst, self.getValor())) 
            
     def getValor(self):
         return self.text()
@@ -91,10 +118,9 @@ class ifCadenaExt (QLineEdit, ifCampo):
         super().__init__(*args, **kwargs)
         self.setEnabled(False)
  
-    def inicializa(self, con_mst, campo_mst, *args):
-        self.conMst = con_mst
-        self.campoMst = campo_mst
-        self.campoExt = args[0]
+    def inicializa(self, c_conf):
+        super().inicializa(c_conf)
+        self.campoExt = c_conf.conf[0]
            
     def getValor(self):
         return self.text()
@@ -117,11 +143,10 @@ class ifTexto(ifCampo, QPlainTextEdit):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
  
-    def inicializa(self, conMst, campoMst, *args):
-        self.conMst = conMst
-        self.campoMst = campoMst  
+    def inicializa(self, c_conf):
+        super().inicializa(c_conf)
         self.textChanged.connect(
-            lambda: conMst().__setitem__(self.campoMst, self.getValor()))
+            lambda: self.parent().maestro.__setitem__(self.campoMst, self.getValor()))
 
     def getValor(self):
         return self.toPlainText()
@@ -146,16 +171,15 @@ class ifVerificacion(ifCampo, QCheckBox):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
  
-    def inicializa(self, conMst, campoMst, *params):
-        self.conMst = conMst
-        self.campoMst = campoMst
-        self.qtsHabil = params[-2]  # Campos dependientes de verificacion
+    def inicializa(self, c_conf):
+        super().inicializa(c_conf)
+        self.qtsHabil = c_conf.conf[-2]  # Campos dependientes de verificacion
 
         self.stateChanged.connect(
             lambda: self.actualizaValidador())
 
     def actualizaValidador(self):
-        self.conMst().__setitem__(self.campoMst, self.getValor())
+        self.parent().maestro.__setitem__(self.campoMst, self.getValor())
         self.habilitaCampos()
 
     def getValor(self):
@@ -191,19 +215,17 @@ class ifRefExtLista(QLineEdit, ifCampo):
         self.lista = None        
         self.lRef = None
            
-    def inicializa(self, con_mst, campo, *args):
-        self.campoMst = campo
-        if args[1]:
-            self.lista = args[-1][args[1]] # lista_mst
+    def inicializa(self, c_conf):
+        super().inicializa(c_conf)
+        if c_conf.conf[1]:
+            self.lista = c_conf.conf[-1][c_conf.conf[1]] # lista_mst
         else:
             self.lista = []
-        self.campoLista = args[0]
+        self.campoLista = c_conf.conf[0]
         
         self.lRef = [str(l[self.campoLista]) for l in self.lista]
         qCompleter = QCompleter(self.lRef)
         self.setCompleter(qCompleter)
-
-        self.conMst = con_mst        
     
     def getValor(self):
         valor = self.text()
@@ -211,13 +233,13 @@ class ifRefExtLista(QLineEdit, ifCampo):
         if self.lRef:
             if valor in self.lRef:
                 ext = self.lista[self.lRef.index(valor)]
-                result = object_session(self.conMst()).merge(ext)
+                result = object_session(self.parent().maestro).merge(ext)
         else:
-            mstExt = getattr(self.conMst().__class__, self.campoMst)
+            mstExt = getattr(self.parent().maestro.__class__, self.campoMst)
             mstExt = mstExt.property.mapper.class_
             stmt = select(mstExt).where(getattr(mstExt, self.campoLista) == valor)
-            ext = object_session(self.conMst()).execute(stmt).fetchone()
-            if ext: result = object_session(self.conMst()).merge(ext[0])
+            ext = object_session(self.parent().maestro).execute(stmt).fetchone()
+            if ext: result = object_session(self.parent().maestro).merge(ext[0])
         return result
     
     def setValor(self, valor):
@@ -229,7 +251,7 @@ class ifRefExtLista(QLineEdit, ifCampo):
         
     def limpia(self):
         self.clear()
-    
+            
 
 class ifDesplegableExt (ifCampo, QComboBox):
     '''
@@ -237,30 +259,28 @@ class ifDesplegableExt (ifCampo, QComboBox):
     '''
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.conMst = None          
         self.campoMst = None
         self.lista = []        
         self.lRef = None
 
-    def inicializa(self, con_mst, campo,*args):        
+    def inicializa(self, c_conf):        
         # *args: nombre_lista_mst, campo_lista, listas
-        self.conMst = con_mst
-        self.campoMst = campo
+        super().inicializa(c_conf)
         
         self.clear()
-        l = args[-1][args[1]]
-        self.campoLista = args[0]
+        l = c_conf.conf[-1][c_conf.conf[1]]
+        self.campoLista = c_conf.conf[0]
         if l: 
             self.lista = l
             self.addItems(['']+self.lista.col(self.campoLista))
 
         self.currentIndexChanged.connect(
-            lambda: self.conMst().__setitem__(self.campoMst, self.getValor()))
+            lambda: self.parent().maestro.__setitem__(self.campoMst, self.getValor()))
 
     def getValor(self):
         ci = self.currentIndex()
         if ci:
-            return object_session(self.conMst()).merge(self.lista[ci-1])
+            return object_session(self.parent().maestro).merge(self.lista[ci-1])
         else:
             return None
             
@@ -279,29 +299,25 @@ class ifDesplegableExt (ifCampo, QComboBox):
         self.blockSignals(False)
   
     
-class ifLista (ifCampo, QListWidget):
+class ifListaMst (ifCampo, QListWidget):
     '''
     Campo que muestra una lista de maestros y guarda la correlación de sus indices
     '''
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.conMst = None          
-        self.campoMst = None
         self.cammpoLst = None
-        self.lRef = None
 
-    def inicializa(self, con_mst, campo_lst, *args):        
+    def inicializa(self, c_conf):        
         # *args: nombre_lista_mst, campo_lista, listas
-        self.conMst = con_mst
-        self.campoMst = campo_lst
-        self.campoLst = args[0]
+        super().inicializa(c_conf)
+        self.campoLst = self.conf.conf[0]
    
         #self.currentIndexChanged.connect(            lambda: self.conMst().__setitem__(self.campoMst, self.getValor()))
 
     def getValor(self):
         ci = self.currentRow()
         if ci >= 0:
-            return self.conMst()[self.campoMst][ci]
+            return self.conMst()[self.conf.campo][ci]
         else:
             return None
             
@@ -309,7 +325,7 @@ class ifLista (ifCampo, QListWidget):
         if valor != self.getValor():
             self.blockSignals(True)
             if valor:
-                self.setCurrentText(valor[self.campoLista])
+                self.setCurrentText(valor[self.campoLst])
             else:
                 self.limpia()
             self.blockSignals(False)
@@ -325,7 +341,27 @@ class ifLista (ifCampo, QListWidget):
             self.limpia()
             for l in args[0]:
                 self.addItem(l[self.campoLst])
+
+    def abreIfMaestro(self, if_mst_clase, **kwargs):
+        # Se carga el ifUinf de edicion
+        ifMst = if_mst_clase(self.parent().cuinf)
+        nuevo = kwargs.pop('nuevo', False)
+        dmst = ifDgMst(self)
+        dmst.dw.setWidget(ifMst)
                 
+        if nuevo:
+            mst = self.conMst()
+            print(mst)
+            ifMst.mnj.session.merge(mst)
+            ifMst.maestro['cliente'] = mst
+        else:
+            valor = self.getValor()
+            if valor:
+                ifMst.setMaestro(valor)
+
+        a = dmst.exec()
+        print(a)
+        del(dmst)                
                         
 class ifLineaTabla (object):
     def __init__(self, mst):
@@ -344,13 +380,11 @@ class ifTabla (ifCampo, QTableWidget):
         self.confCampos = None
         self.valListas = None
         
-    def inicializa(self, con_mst, campo_mst, *args):
-        self.confCampos = args[0]
-        self.valListas = args[-1]
-        self.conMst = con_mst
+    def inicializa(self, c_conf):
+        super().inicializa(c_conf)        
+        self.confCampos = c_conf.conf[0] # Configuraciones de cada uno de los campos de la tabla
+        self.valListas = self.parent().valListas
 
-        # Los objetos complejos tienen que tener acceso al maestro ya que tienen señales internas de modificación
-        self.campoMst = campo_mst
         # Se crean las columnas de la tabla según la lista paada
         self.setColumnCount(len(self.confCampos))
         i = 0
@@ -377,7 +411,7 @@ class ifTabla (ifCampo, QTableWidget):
         i += 1
         cabecera.setSectionResizeMode(i, QtWidgets.QHeaderView.Stretch)
         
-        self.itemChanged.connect(lambda: self.conMst().__setitem__(self.campoMst, self.getValor()))
+        self.itemChanged.connect(lambda: self.parent().maestro.__setitem__(self.campoMst, self.getValor()))
         
         
     def menuIfTabla(self, posicion):
@@ -390,14 +424,14 @@ class ifTabla (ifCampo, QTableWidget):
         fila = self.verticalHeader().logicalIndexAt(posicion)
         if action == insertAction:
             if self.currentRow() < 0:
-                self.conMst().nuevaLinea(self.campoMst)                
+                self.parent().maestro.nuevaLinea(self.campoMst)                
             else:
-                self.conMst().nuevaLinea(self.campoMst, fila)
+                self.parent().maestro.nuevaLinea(self.campoMst, fila)
         elif action == borraAction:
             if (self.currentRow() >= 0):
-                self.conMst().borraLinea(self.campoMst, fila)
+                self.parent().maestro.borraLinea(self.campoMst, fila)
         elif action == agregAction:
-            self.conMst().nuevaLinea(self.campoMst)
+            self.parent().maestro.nuevaLinea(self.campoMst)
 
     def trataTab(self, campo):
         #event = Qt5.QtGui.QKeyEvent(Qt5.QtCore.QEvent.KeyPress, Qt5.QtCore.Qt.Key_Tab, Qt5.QtCore.Qt.NoModifier)
@@ -455,10 +489,10 @@ class ifTabla (ifCampo, QTableWidget):
     def trataPulsaBoton(self):
         ch = self.sender()
         ix = self.indexAt(ch.pos())
-        self.conMst.maestro[self.campoMst][ix.row()][self.nombreCol(ix.column())] = ch.isChecked()
+        self.parent().maestro[self.campoMst][ix.row()][self.nombreCol(ix.column())] = ch.isChecked()
     
     def conMstLinea(self):
-        return self.conMst()[self.campoMst][self.currentRow()]
+        return self.parent().maestro[self.campoMst][self.currentRow()]
         
     def agregaFila(self, valores, n_fila=None):
         # Se cargan los ifCampos y sus desencadenadores al actualizarlos
@@ -508,7 +542,7 @@ class ifTabla (ifCampo, QTableWidget):
         if (len(fuente)-1):
             nFila = fuente[1]
             if senyal == 'nf':
-                self.agregaFila(self.conMst()[self.campoMst][nFila], nFila)
+                self.agregaFila(self.parent().maestro[self.campoMst][nFila], nFila)
             elif senyal == 'bf':
                 self.removeRow(nFila)
             elif (len(fuente)-2):
@@ -521,14 +555,14 @@ class ifTabla (ifCampo, QTableWidget):
                 self.agregaFila(l, l.orden)
                 
 
-def nuevoIfCampo(if_widget, tipoIf, conMst, campoMst, *args):
+def nuevoIfCampo(if_widget, tipoIf, padre, campoMst, *args):
     # Se cargan los ifCampos y sus desencadenadores al actualizarlos
     # Parámetros kwargs
     #  - campo_qt: Campo qt asociado al ifCampo. Si no existe se crea uno nuevo
     #  - param: Parámetros extra para la creación de cada ifCampo
     
     ifCampo = eval(tipoIf+"(parent=if_widget)")
-    ifCampo.inicializa(conMst, campoMst, *args)
+    ifCampo.inicializa(campoMst, *args)
   
     return ifCampo 
    

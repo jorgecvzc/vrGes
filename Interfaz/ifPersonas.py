@@ -35,10 +35,12 @@ class ifClientes(ifMaestro):
     Campos = {
         'leRef': cConf('ref'),
         'leNombre': cConf('nombre',),
-        'lwProcedimientos': cConf('procedimientos', 'nombre', acciones=acConf(ifProcedimientos, ifMaestro.abrirIfMaestro))
+        'lwProcedimientos': cConf('procedimientos', 'nombre', 
+                                  accion=acConf('abreIfMaestro', ifProcedimientos))
     }
 
     Botones = {
-        'pbAgregaProc': (ifProcedimientos, 'lwProcedimientos')
+        'pbAgregaProc': ('lwProcedimientos', acConf('abreIfMaestro', ifProcedimientos, nuevo=True))
         }
+    
     BusquedaMaestro = (['ref', 'nombre'], ['ref', 'nombre'])

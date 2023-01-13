@@ -106,7 +106,7 @@
         <enum>QLayout::SetDefaultConstraint</enum>
        </property>
        <item>
-        <widget class="ifLista" name="lwProcedimientos">
+        <widget class="ifListaMst" name="lwProcedimientos">
          <property name="maximumSize">
           <size>
            <width>16777215</width>
@@ -138,7 +138,7 @@
    <header>Interfaz/Campos.h</header>
   </customwidget>
   <customwidget>
-   <class>ifLista</class>
+   <class>ifListaMst</class>
    <extends>QListWidget</extends>
    <header>Interfaz/Campos.h</header>
   </customwidget>
