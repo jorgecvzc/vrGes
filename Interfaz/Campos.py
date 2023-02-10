@@ -351,16 +351,21 @@ class ifListaMst (ifCampo, QListWidget):
                 
         if nuevo:
             mst = self.conMst()
-            print(mst)
-            ifMst.mnj.session.merge(mst)
-            ifMst.maestro['cliente'] = mst
+            ifMst.maestro['cliente'] = ifMst.mnj.session.merge(mst)
         else:
             valor = self.getValor()
             if valor:
                 ifMst.setMaestro(valor)
 
-        a = dmst.exec()
-        print(a)
+        cambio = dmst.exec()
+        if cambio:
+            if nuevo:
+                valor = self.parent().mnj.session.merge(ifMst.maestro)
+                self.parent().mnj.session.refresh(mst)
+            else:
+                self.parent().mnj.session.refresh(valor)
+            self.parent().cargaIfCampos()
+            
         del(dmst)                
                         
 class ifLineaTabla (object):

@@ -152,16 +152,20 @@ class ifMaestro(QtWidgets.QWidget):
 
         self.vaciaIfCampos()
         cargaRIfC([self.TipoMaestro], self.cmpEditables)    
-        
-    def guardarSiCambios (self):
+    
+    def guardarSiCambios (self, automatico=False):
         if self.maestro and self.maestro.modificado():
-            buttonReply = QMessageBox.question(self, 'Datos Modificados', "Datos modificados. ¿Desea guardarlos?", QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel, QMessageBox.Cancel)
-            if buttonReply == QMessageBox.Cancel:
-                return 0
-            elif buttonReply == QMessageBox.Yes:
+            if not automatico:
+                buttonReply = QMessageBox.question(self, 'Datos Modificados', "Datos modificados. ¿Desea guardarlos?", QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel, QMessageBox.Cancel)
+                if buttonReply == QMessageBox.Cancel:
+                    return 0
+                elif buttonReply == QMessageBox.Yes:
+                    self.mnj.almacena()
+                    return 1
+            else:
                 self.mnj.almacena()
-                return 2
-        return 1            
+                return 1
+        return 2          
     
     '''
      Operaciones del usuario sobre el maestro

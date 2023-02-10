@@ -22,10 +22,10 @@ class ifDgMst (QtWidgets.QDialog):
         print(f'Delete {self!s}')
         
     def aceptar(self):
-        guardado = self.dw.widget().guardarSiCambios()
-        if guardado == 2:
+        guardado = self.dw.widget().guardarSiCambios(True)
+        if guardado == 1:
             self.accept()
-        elif guardado == 1:
+        else:
             self.reject()
             
     def cancelar(self):
